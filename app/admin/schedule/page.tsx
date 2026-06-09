@@ -1,11 +1,11 @@
-import { requireAuth } from "@/module/auth/utils/auth-utils"
+import { requireAdminAuth } from "@/module/auth/utils/admin-auth-utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { SchedulePage } from "@/components/admin/schedule-wrapper"
 
 export default async function AdminSchedule() {
-  const { user } = await requireAuth()
+  await requireAdminAuth()
   return (
-    <AdminLayout user={user}>
+    <AdminLayout>
       <SchedulePage />
     </AdminLayout>
   )

@@ -1,4 +1,4 @@
-import { requireAuth } from "@/module/auth/utils/auth-utils"
+import { requireAdminAuth } from "@/module/auth/utils/admin-auth-utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -11,10 +11,9 @@ import {
 } from "lucide-react"
 
 export default async function AdminDashboard() {
-  const { user } = await requireAuth()
-
+  await requireAdminAuth()
   return (
-    <AdminLayout user={user}>
+    <AdminLayout>
       <div className="space-y-8">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>

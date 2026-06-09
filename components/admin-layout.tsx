@@ -1,18 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { AdminSidebar } from "@/components/admin-sidebar"
-import { Menu, X, Shield } from "lucide-react"
-import { ProfileMenu } from "@/components/profile"
+import { Menu, X, Shield, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { adminLogout } from "@/module/auth/utils/admin-auth-utils"
 
-interface Props {
-  user: { name?: string | null; email?: string | null; image?: string | null }
-  children: React.ReactNode
-}
-
-export function AdminLayout({ user, children }: Props) {
+export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pending, startTransition] = useTransition()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -64,7 +60,13 @@ export function AdminLayout({ user, children }: Props) {
             <span className="hidden rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground sm:inline">
               Admin
             </span>
-            <ProfileMenu user={user} />
+            <button
+              onClick={() => startTransition(() => adminLogout())}
+              disabled={pending}
+              className="flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4 text-destructive" />
+            </button>
           </div>
         </header>
 

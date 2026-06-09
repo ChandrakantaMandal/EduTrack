@@ -1,11 +1,11 @@
-import { requireAuth } from "@/module/auth/utils/auth-utils"
+import { requireAdminAuth } from "@/module/auth/utils/admin-auth-utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { SubjectsPage } from "@/components/admin/subjects-wrapper"
 
 export default async function AdminSubjects() {
-  const { user } = await requireAuth()
+  await requireAdminAuth()
   return (
-    <AdminLayout user={user}>
+    <AdminLayout>
       <SubjectsPage />
     </AdminLayout>
   )

@@ -103,6 +103,12 @@ export default async function Page() {
           >
             Get Started
           </Link>
+          <Link
+            href="/admin  /login"
+            className="text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            Admin Sign in
+          </Link>
         </div>
       </header>
 
