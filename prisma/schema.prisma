@@ -18,9 +18,12 @@ model User {
   email         String?  @unique
   emailVerified DateTime?
   image         String?
+  studentId     String?  @unique
+  course        String?
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts   Account[]
+  sessions   Session[]
+  attendance Attendance[]
 }
 
 model Account {
@@ -49,4 +52,42 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subject {
+  id        String  @id @default(cuid())
+  name      String
+  code      String  @unique
+  professor String?
+  schedule  String?
+
+  attendance      Attendance[]
+  scheduleEntries ScheduleEntry[]
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  userId    String
+  subjectId String
+  date      DateTime
+  present   Boolean
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId, date])
+}
+
+model ScheduleEntry {
+  id        String @id @default(cuid())
+  subjectId String
+  day       String
+  startTime String
+  endTime   String
+  room      String?
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, day, startTime])
 }

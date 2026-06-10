@@ -1,10 +1,9 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, BookOpen, BarChart3, Settings } from "lucide-react"
+import { BarChart3, BookOpen, LayoutDashboard, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ViewSchedule } from "@/components/schedule"
 
 const items = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -52,9 +51,6 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="mt-auto w-full">
-        <ViewSchedule />
-      </div>
     </div>
   )
 }

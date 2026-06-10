@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 
 export const SubjectsPage = dynamic(
   () =>
-    import("@/module/subjects/admin/components/subjects-page").then((m) => ({
+    import("@/module/admin/subjects/components/subjects-page").then((m) => ({
       default: m.SubjectsPage,
     })),
   { ssr: false }

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 
 export const ReportsPage = dynamic(
   () =>
-    import("@/module/Reports/users/components/reports-page").then((m) => ({
+    import("@/module/user/Reports/components/reports-page").then((m) => ({
       default: m.ReportsPage,
     })),
   { ssr: false }

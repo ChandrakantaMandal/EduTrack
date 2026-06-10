@@ -1,30 +1,30 @@
 "use client"
 
-import { Input } from "@/components/ui/input"
-import { ProfileMenu } from "./profile"
 import { ViewSchedule } from "@/components/schedule"
+import { Input } from "@/components/ui/input"
+import { Calendar } from "lucide-react"
+import { useState } from "react"
+import { ProfileMenu } from "./profile"
 
-interface Props {
-  user: {
-    name?: string | null
-    email?: string | null
-    image?: string | null
-  }
-}
+export function Header({
+  user,
+}: {
+  user: { name?: string | null; email?: string | null; image?: string | null }
+}) {
+  const [open, setOpen] = useState(false)
 
-export function Header({ user }: Props) {
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur lg:h-16 lg:px-6">
-      <Input
-        placeholder="Search..."
-        className="hidden w-48 sm:block lg:w-72 xl:w-96"
-      />
-      <div className="flex items-center gap-2">
-        <div className="hidden lg:block">
-          <ViewSchedule compact />
+    <>
+      <header className="flex h-14 items-center justify-between border-b px-4">
+        <Input placeholder="Search..." className="hidden w-72 sm:block" />
+
+        <div className="flex items-center gap-2">
+          <Calendar className="h-6 w-6" onClick={() => setOpen(true)} />
+
+          <ProfileMenu user={user} />
         </div>
-        <ProfileMenu user={user} />
-      </div>
-    </header>
+      </header>
+      <ViewSchedule open={open} onClose={() => setOpen(false)} />
+    </>
   )
 }

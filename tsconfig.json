@@ -30,7 +30,7 @@
     "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "module/subjects/users/components/subject-card.tsx"
+    "module/user/subjects/components/subject-card.tsx"
   ],
   "exclude": ["node_modules"]
 }

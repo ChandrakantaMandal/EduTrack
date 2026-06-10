@@ -1,9 +1,9 @@
 import { requireAuth } from "@/module/auth/utils/auth-utils"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { Card, CardContent } from "@/components/ui/card"
-import { SubjectCard } from "@/module/subjects/users/components/subject-card"
-import { MonthlyTrend } from "@/module/dashboard/user/components/bar-chart"
-import { AttendanceCard } from "@/module/dashboard/user/components/attendance-card"
+import { SubjectCard } from "@/module/user/subjects/components/subject-card"
+import { MonthlyTrend } from "@/module/user/dashboard/components/bar-chart"
+import { AttendanceCard } from "@/module/user/dashboard/components/attendance-card"
 import { BookOpen, TrendingUp, CalendarCheck, Award } from "lucide-react"
 
 export default async function Dashboard() {

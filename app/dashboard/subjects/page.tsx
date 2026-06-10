@@ -7,7 +7,7 @@ export default async function Subjects() {
 
   return (
     <DashboardLayout user={user}>
-      <SubjectsPage />
+      <SubjectsPage userId={user.id!} />
     </DashboardLayout>
   )
 }
