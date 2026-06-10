@@ -12,8 +12,14 @@ export async function getSchedule(includeSubjects = false) {
     orderBy: [{ day: "asc" }, { startTime: "asc" }],
   })
   if (!includeSubjects) return entries
+
+  const entrySubjectIds = new Set(entries.map((e) => e.subjectId))
+
   const subjects = await prisma.subject.findMany({
-    where: { schedule: { not: null } },
+    where: {
+      schedule: { not: null },
+      id: { notIn: Array.from(entrySubjectIds) },
+    },
   })
   const subjectEntries = subjects.map((s) => ({
     id: `subject-${s.id}`,

@@ -36,6 +36,10 @@ export function SubjectsPage() {
     })
   }, [])
 
+  function load() {
+    getAllSubjects().then((s) => setSubjects(s as Subject[]))
+  }
+
   const filtered = subjects.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
   )

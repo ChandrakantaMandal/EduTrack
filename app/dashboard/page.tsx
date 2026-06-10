@@ -5,9 +5,11 @@ import { SubjectCard } from "@/module/user/subjects/components/subject-card"
 import { MonthlyTrend } from "@/module/user/dashboard/components/bar-chart"
 import { AttendanceCard } from "@/module/user/dashboard/components/attendance-card"
 import { BookOpen, TrendingUp, CalendarCheck, Award } from "lucide-react"
+import { getStudentDashboardData } from "@/module/user/dashboard/actions/actions"
 
 export default async function Dashboard() {
   const { user } = await requireAuth()
+  const data = await getStudentDashboardData(user.id!)
 
   return (
     <DashboardLayout user={user}>
@@ -35,7 +37,9 @@ export default async function Dashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Subjects</p>
-                <p className="text-lg font-bold sm:text-xl">3</p>
+                <p className="text-lg font-bold sm:text-xl">
+                  {data.subjects.length}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -46,7 +50,9 @@ export default async function Dashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Avg. Attendance</p>
-                <p className="text-lg font-bold sm:text-xl">84%</p>
+                <p className="text-lg font-bold sm:text-xl">
+                  {data.avgAttendance}%
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -57,7 +63,9 @@ export default async function Dashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Best Subject</p>
-                <p className="text-lg font-bold sm:text-xl">Physics</p>
+                <p className="text-lg font-bold sm:text-xl">
+                  {data.bestSubject?.name ?? "—"}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -68,16 +76,18 @@ export default async function Dashboard() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Days Present</p>
-                <p className="text-lg font-bold sm:text-xl">42/50</p>
+                <p className="text-lg font-bold sm:text-xl">
+                  {data.daysPresent}/{data.totalDays}
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <AttendanceCard />
+          <AttendanceCard value={data.avgAttendance} />
           <div className="lg:col-span-2">
-            <MonthlyTrend />
+            <MonthlyTrend data={data.monthlyTrend} />
           </div>
         </div>
 
@@ -94,9 +104,14 @@ export default async function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-            <SubjectCard title="Mathematics" professor="Feynman" percent={90} />
-            <SubjectCard title="Physics" professor="Marie Curie" percent={78} />
-            <SubjectCard title="Chemistry" professor="Pauling" percent={85} />
+            {data.subjects.map((s) => (
+              <SubjectCard
+                key={s.id}
+                title={s.name}
+                professor={s.professor ?? "—"}
+                percent={s.attendance.percentage}
+              />
+            ))}
           </div>
         </div>
       </div>

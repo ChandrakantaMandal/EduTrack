@@ -64,6 +64,10 @@ export function SchedulePage() {
     })
   }, [])
 
+  function load() {
+    getSchedule().then((sch) => setSchedule(sch as ScheduleItem[]))
+  }
+
   const daySchedule = schedule.filter((s) => s.day === day)
 
   function openNew() {

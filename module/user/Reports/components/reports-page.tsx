@@ -1,74 +1,124 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  BarChart3,
   TrendingUp,
   TrendingDown,
   Calendar,
   Download,
   FileText,
+  Loader2,
 } from "lucide-react"
+import { getStudentReports } from "@/module/user/Reports/actions/actions"
 
-const reports = [
-  {
-    id: 1,
-    title: "Monthly Attendance Summary",
-    date: "May 2026",
-    type: "PDF",
-    status: "ready",
-  },
-  {
-    id: 2,
-    title: "Subject-wise Performance",
-    date: "Spring 2026",
-    type: "PDF",
-    status: "ready",
-  },
-  {
-    id: 3,
-    title: "Weekly Trend Report",
-    date: "Jun 1–7, 2026",
-    type: "CSV",
-    status: "ready",
-  },
-  {
-    id: 4,
-    title: "Attendance History - Mathematics",
-    date: "Full Semester",
-    type: "PDF",
-    status: "generating",
-  },
-]
+type ReportsData = {
+  monthlySummary: {
+    month: string
+    percentage: number
+    present: number
+    total: number
+  }[]
+  subjectWise: {
+    subject: string
+    percentage: number
+    present: number
+    total: number
+  }[]
+  weeklyTrend: {
+    week: string
+    percentage: number
+    present: number
+    total: number
+  }[]
+  insights: {
+    bestDay: string | null
+    needsImprovement: { subject: string; percentage: number } | null
+    currentStreak: number
+    peakMonth: string | null
+  }
+}
 
-const insights = [
-  {
-    label: "Best Day",
-    value: "Wednesday",
-    change: "+12% vs avg",
-    up: true,
-  },
-  {
-    label: "Needs Improvement",
-    value: "Biology",
-    change: "-15% vs avg",
-    up: false,
-  },
-  {
-    label: "Current Streak",
-    value: "6 days",
-    change: "+2 from last week",
-    up: true,
-  },
-  {
-    label: "Peak Month",
-    value: "March",
-    change: "94% attendance",
-    up: true,
-  },
-]
+export function ReportsPage({ userId }: { userId: string }) {
+  const [data, setData] = useState<ReportsData | null>(null)
+  const [loading, setLoading] = useState(true)
 
-export function ReportsPage() {
+  useEffect(() => {
+    getStudentReports(userId)
+      .then(setData)
+      .finally(() => setLoading(false))
+  }, [userId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!data || data.monthlySummary.length === 0) {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            Reports
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No attendance data yet
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const insights = [
+    {
+      label: "Best Day",
+      value: data.insights.bestDay ?? "Not available",
+      change: data.insights.bestDay ? "Highest attendance day" : "No data yet",
+      up: true,
+    },
+    {
+      label: "Needs Improvement",
+      value: data.insights.needsImprovement?.subject ?? "Not available",
+      change: data.insights.needsImprovement
+        ? `${data.insights.needsImprovement.percentage}% attendance`
+        : "No improvements needed",
+      up: false,
+    },
+    {
+      label: "Current Streak",
+      value: `${data.insights.currentStreak} days`,
+      change:
+        data.insights.currentStreak > 0
+          ? "Consecutive present days"
+          : "No streak yet",
+      up: data.insights.currentStreak > 0,
+    },
+    {
+      label: "Peak Month",
+      value: data.insights.peakMonth
+        ? new Date(data.insights.peakMonth + "-01").toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })
+        : "Not available",
+      change: "Highest monthly attendance",
+      up: true,
+    },
+  ]
+
+  function monthLabel(m: string) {
+    const d = new Date(m + "-01")
+    return d.toLocaleString("default", { month: "short", year: "numeric" })
+  }
+
+  function weekLabel(w: string) {
+    const d = new Date(w)
+    return `${d.toLocaleString("default", { month: "short" })} ${d.getDate()}`
+  }
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -96,27 +146,136 @@ export function ReportsPage() {
                 <p className="mt-1 text-xl font-bold text-foreground">
                   {insight.value}
                 </p>
-                <div className="mt-2 flex items-center gap-1 text-xs">
-                  <Icon
-                    className={`h-3.5 w-3.5 ${
-                      insight.up ? "text-green-500" : "text-red-500"
-                    }`}
-                  />
-                  <span
-                    className={
-                      insight.up
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
-                    }
-                  >
-                    {insight.change}
-                  </span>
-                </div>
+                {insight.change && (
+                  <div className="mt-2 flex items-center gap-1 text-xs">
+                    <Icon
+                      className={`h-3.5 w-3.5 ${
+                        insight.up ? "text-green-500" : "text-red-500"
+                      }`}
+                    />
+                    <span
+                      className={
+                        insight.up
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-red-600 dark:text-red-400"
+                      }
+                    >
+                      {insight.change}
+                    </span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )
         })}
       </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardContent className="p-5">
+            <h3 className="mb-4 text-sm font-semibold text-foreground">
+              Monthly Attendance Summary
+            </h3>
+            <div className="space-y-3">
+              {data.monthlySummary.map((m) => (
+                <div key={m.month}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="text-foreground">
+                      {monthLabel(m.month)}
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {m.percentage}%
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${m.percentage}%` }}
+                    />
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {m.present}/{m.total} present
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <h3 className="mb-4 text-sm font-semibold text-foreground">
+              Subject-wise Performance
+            </h3>
+            <div className="space-y-3">
+              {data.subjectWise.map((s) => (
+                <div key={s.subject}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="text-foreground">{s.subject}</span>
+                    <span className="font-medium text-foreground">
+                      {s.percentage}%
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        s.percentage >= 75
+                          ? "bg-green-500"
+                          : s.percentage >= 50
+                            ? "bg-amber-500"
+                            : "bg-red-500"
+                      }`}
+                      style={{ width: `${s.percentage}%` }}
+                    />
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {s.present}/{s.total} present
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">
+            Weekly Trend Report
+          </h3>
+          <div className="flex h-40 items-end gap-3">
+            {data.weeklyTrend.map((w) => (
+              <div
+                key={w.week}
+                className="flex h-full flex-1 flex-col items-center justify-end"
+              >
+                <div
+                  className="w-full rounded bg-primary transition-all"
+                  style={{ height: `${Math.max(w.percentage, 4)}%` }}
+                />
+                <span className="mt-1 text-[10px] text-muted-foreground">
+                  {weekLabel(w.week)}
+                </span>
+              </div>
+            ))}
+          </div>
+          {data.weeklyTrend.length > 0 && (
+            <div className="mt-6 space-y-2">
+              {data.weeklyTrend.map((w) => (
+                <div
+                  key={w.week}
+                  className="flex items-center justify-between border-b py-2 text-sm last:border-0"
+                >
+                  <span className="text-foreground">{weekLabel(w.week)}</span>
+                  <span className="text-muted-foreground">
+                    {w.present}/{w.total} · {w.percentage}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div>
         <div className="mb-4 flex items-center justify-between">
@@ -130,8 +289,24 @@ export function ReportsPage() {
         </div>
 
         <div className="space-y-3">
-          {reports.map((r) => (
-            <Card key={r.id} className="transition hover:shadow-sm">
+          {[
+            {
+              title: "Monthly Attendance Summary",
+              date: monthLabel(data.monthlySummary[0]?.month ?? ""),
+              type: "PDF",
+            },
+            {
+              title: "Subject-wise Performance",
+              date: `${data.subjectWise.length} subjects`,
+              type: "PDF",
+            },
+            {
+              title: "Weekly Trend Report",
+              date: `${data.weeklyTrend.length} weeks`,
+              type: "CSV",
+            },
+          ].map((r, i) => (
+            <Card key={i} className="transition hover:shadow-sm">
               <CardContent className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:p-5">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-10 sm:w-10">
@@ -147,39 +322,18 @@ export function ReportsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 self-end sm:gap-3 sm:self-auto">
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
-                      r.status === "ready"
-                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                    }`}
-                  >
-                    {r.status === "ready" ? "Ready" : "Generating"}
+                  <span className="shrink-0 rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
+                    Ready
                   </span>
-                  {r.status === "ready" && (
-                    <button className="shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted">
-                      Download
-                    </button>
-                  )}
+                  <button className="shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted">
+                    Download
+                  </button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
-
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <BarChart3 className="mb-3 h-8 w-8 text-muted-foreground/50" />
-          <p className="text-sm font-medium text-foreground">Custom Report</p>
-          <p className="mt-1 mb-4 text-xs text-muted-foreground">
-            Select date range and subjects to generate a custom report
-          </p>
-          <button className="rounded-xl bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90">
-            Generate Report
-          </button>
-        </CardContent>
-      </Card>
     </div>
   )
 }

@@ -9,9 +9,12 @@ import {
   UserPlus,
   ArrowUpRight,
 } from "lucide-react"
+import { getAdminDashboardData } from "@/module/admin/dashboard/actions/actions"
 
 export default async function AdminDashboard() {
   await requireAdminAuth()
+  const data = await getAdminDashboardData()
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -37,12 +40,10 @@ export default async function AdminDashboard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
-                  <ArrowUpRight className="h-3 w-3" />
-                  +12%
-                </span>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">1,248</p>
+              <p className="mt-4 text-2xl font-bold text-foreground">
+                {data.totalStudents}
+              </p>
               <p className="text-xs text-muted-foreground">Total Students</p>
             </CardContent>
           </Card>
@@ -52,12 +53,10 @@ export default async function AdminDashboard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
                   <BookOpen className="h-5 w-5 text-secondary" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
-                  <ArrowUpRight className="h-3 w-3" />
-                  +3
-                </span>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">24</p>
+              <p className="mt-4 text-2xl font-bold text-foreground">
+                {data.totalSubjects}
+              </p>
               <p className="text-xs text-muted-foreground">Active Courses</p>
             </CardContent>
           </Card>
@@ -67,12 +66,16 @@ export default async function AdminDashboard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
                   <TrendingUp className="h-5 w-5 text-accent" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
-                  <ArrowUpRight className="h-3 w-3" />
-                  +5%
-                </span>
+                {data.avgAttendance > 0 && (
+                  <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
+                    <ArrowUpRight className="h-3 w-3" />
+                    {data.avgAttendance}%
+                  </span>
+                )}
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">84.3%</p>
+              <p className="mt-4 text-2xl font-bold text-foreground">
+                {data.avgAttendance}%
+              </p>
               <p className="text-xs text-muted-foreground">Avg Attendance</p>
             </CardContent>
           </Card>
@@ -82,13 +85,13 @@ export default async function AdminDashboard() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
                   <UserPlus className="h-5 w-5 text-destructive" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs text-amber-600 dark:text-amber-400">
-                  <ArrowUpRight className="h-3 w-3" />
-                  +8
-                </span>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">18</p>
-              <p className="text-xs text-muted-foreground">New This Month</p>
+              <p className="mt-4 text-2xl font-bold text-foreground">
+                {data.recentStudents.length}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Recent Registrations
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -100,49 +103,28 @@ export default async function AdminDashboard() {
                 Recent Registrations
               </h2>
               <div className="space-y-3">
-                {[
-                  {
-                    name: "Alice Johnson",
-                    email: "alice@university.edu",
-                    date: "Today",
-                    course: "Mathematics",
-                  },
-                  {
-                    name: "Bob Smith",
-                    email: "bob@university.edu",
-                    date: "Yesterday",
-                    course: "Physics",
-                  },
-                  {
-                    name: "Carol White",
-                    email: "carol@university.edu",
-                    date: "2 days ago",
-                    course: "Computer Science",
-                  },
-                  {
-                    name: "David Brown",
-                    email: "david@university.edu",
-                    date: "3 days ago",
-                    course: "Chemistry",
-                  },
-                ].map((s, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border-b py-2 last:border-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {s.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {s.email} · {s.course}
-                      </p>
+                {data.recentStudents.length > 0 ? (
+                  data.recentStudents.map((s, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between border-b py-2 last:border-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {s.name ?? "Unnamed"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {s.email ?? ""}
+                          {s.course ? ` · ${s.course}` : ""}
+                        </p>
+                      </div>
                     </div>
-                    <span className="ml-2 shrink-0 text-xs text-muted-foreground">
-                      {s.date}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    No registrations yet
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -153,35 +135,36 @@ export default async function AdminDashboard() {
                 Attendance Alerts
               </h2>
               <div className="space-y-3">
-                {[
-                  { name: "Mathematics 301", students: 12, status: "critical" },
-                  { name: "Physics 205", students: 8, status: "warning" },
-                  { name: "Chemistry 102", students: 5, status: "warning" },
-                  { name: "Literature 105", students: 3, status: "normal" },
-                ].map((c, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border-b py-2 last:border-0"
-                  >
-                    <p className="text-sm font-medium text-foreground">
-                      {c.name}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {c.students} below
-                      </span>
-                      <span
-                        className={`h-2 w-2 rounded-full ${
-                          c.status === "critical"
-                            ? "bg-red-500"
-                            : c.status === "warning"
-                              ? "bg-amber-500"
-                              : "bg-green-500"
-                        }`}
-                      />
+                {data.alerts.length > 0 ? (
+                  data.alerts.map((c, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between border-b py-2 last:border-0"
+                    >
+                      <p className="text-sm font-medium text-foreground">
+                        {c.name}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {c.students} below
+                        </span>
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            c.status === "critical"
+                              ? "bg-red-500"
+                              : c.status === "warning"
+                                ? "bg-amber-500"
+                                : "bg-green-500"
+                          }`}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    No alerts
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

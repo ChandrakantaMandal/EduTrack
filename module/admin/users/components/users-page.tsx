@@ -133,11 +133,7 @@ export function UsersPage() {
             <span>Course</span>
             <span className="text-right">Mark</span>
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading...
-            </div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               No students found
             </div>

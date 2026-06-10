@@ -55,3 +55,79 @@ export async function saveAttendance(
     )
   )
 }
+
+export async function getAdminDashboardData() {
+  const totalStudents = await prisma.user.count({
+    where: { studentId: { not: null } },
+  })
+
+  const totalSubjects = await prisma.subject.count()
+
+  const attendanceRecords = await prisma.attendance.findMany({
+    select: { present: true },
+  })
+  const totalAttendanceDays = attendanceRecords.length
+  const presentDays = attendanceRecords.filter((r) => r.present).length
+  const avgAttendance =
+    totalAttendanceDays > 0
+      ? Math.round((presentDays / totalAttendanceDays) * 100 * 10) / 10
+      : 0
+
+  const recentStudents = await prisma.user.findMany({
+    where: { studentId: { not: null } },
+    select: { name: true, email: true, studentId: true, course: true },
+    orderBy: { id: "desc" },
+    take: 4,
+  })
+
+  const subjects = await prisma.subject.findMany({
+    select: { id: true, name: true },
+  })
+
+  const alerts: { name: string; students: number; status: string }[] = []
+  for (const s of subjects) {
+    const subjectAttendance = await prisma.attendance.findMany({
+      where: { subjectId: s.id },
+      select: { userId: true, present: true },
+    })
+    if (subjectAttendance.length === 0) continue
+
+    const userMap = new Map<string, { total: number; present: number }>()
+    for (const r of subjectAttendance) {
+      if (!userMap.has(r.userId))
+        userMap.set(r.userId, { total: 0, present: 0 })
+      const entry = userMap.get(r.userId)!
+      entry.total++
+      if (r.present) entry.present++
+    }
+
+    let belowThreshold = 0
+    for (const entry of userMap.values()) {
+      const pct = (entry.present / entry.total) * 100
+      if (pct < 75) belowThreshold++
+    }
+
+    if (belowThreshold > 0) {
+      alerts.push({
+        name: s.name,
+        students: belowThreshold,
+        status:
+          belowThreshold > 10
+            ? "critical"
+            : belowThreshold > 5
+              ? "warning"
+              : "normal",
+      })
+    }
+  }
+
+  alerts.sort((a, b) => b.students - a.students)
+
+  return {
+    totalStudents,
+    totalSubjects,
+    avgAttendance,
+    recentStudents,
+    alerts,
+  }
+}

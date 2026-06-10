@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card"
 
-export function AttendanceCard() {
+export function AttendanceCard({ value }: { value: number }) {
   return (
     <Card className="flex flex-col items-center p-6">
       <h2 className="mb-4 w-full font-semibold">Overall Attendance</h2>
 
-      <CircularProgress value={85} />
+      <CircularProgress value={value} />
     </Card>
   )
 }

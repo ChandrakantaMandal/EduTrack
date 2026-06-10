@@ -7,7 +7,7 @@ export default async function Reports() {
 
   return (
     <DashboardLayout user={user}>
-      <ReportsPage />
+      <ReportsPage userId={user.id!} />
     </DashboardLayout>
   )
 }

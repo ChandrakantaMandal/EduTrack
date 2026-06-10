@@ -7,7 +7,12 @@ import { Menu, X } from "lucide-react"
 import { ViewSchedule } from "@/components/schedule"
 
 interface Props {
-  user: { name?: string | null; email?: string | null; image?: string | null }
+  user: {
+    id?: string
+    name?: string | null
+    email?: string | null
+    image?: string | null
+  }
   children: React.ReactNode
 }
 
@@ -53,10 +58,9 @@ export function DashboardLayout({ user, children }: Props) {
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-base font-bold text-primary">EduTrack</h1>
-          <ViewSchedule compact />
         </div>
 
-        <Header user={user} />
+        <Header user={user} userId={user.id} />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           {children}
         </main>
