@@ -2,7 +2,17 @@
 
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bell, Shield, Globe, Palette, Users, Building } from "lucide-react"
+import {
+  Bell,
+  Shield,
+  Globe,
+  Palette,
+  Users,
+  Building,
+  Sun,
+  Moon,
+} from "lucide-react"
+import { useTheme } from "next-themes"
 
 const sections = [
   {
@@ -45,6 +55,7 @@ const sections = [
 
 export function SettingsPage() {
   const [active, setActive] = useState("general")
+  const { theme, setTheme } = useTheme()
 
   return (
     <div className="space-y-6">
@@ -149,18 +160,64 @@ export function SettingsPage() {
             </Card>
           )}
 
-          {active !== "general" && active !== "notifications" && (
+          {active === "appearance" && (
             <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {sections.find((s) => s.id === active)?.desc} settings
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Coming soon
-                </p>
+              <CardContent className="space-y-4 p-5">
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Theme
+                  </label>
+                  <div className="mt-2 flex gap-3">
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "light"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Sun className="h-4 w-4" /> Light
+                    </button>
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "dark"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Moon className="h-4 w-4" /> Dark
+                    </button>
+                    <button
+                      onClick={() => setTheme("system")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "system"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Globe className="h-4 w-4" /> System
+                    </button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
+
+          {active !== "general" &&
+            active !== "notifications" &&
+            active !== "appearance" && (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {sections.find((s) => s.id === active)?.desc} settings
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Coming soon
+                  </p>
+                </CardContent>
+              </Card>
+            )}
         </div>
       </div>
     </div>

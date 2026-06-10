@@ -1,8 +1,15 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bell, Moon, Shield, User, Palette, Globe } from "lucide-react"
-import { useState } from "react"
+import { Bell, Moon, Shield, User, Palette, Globe, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import {
+  getUserProfile,
+  updateUserProfile,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+} from "@/module/user/Settings/actions/actions"
 
 const sections = [
   {
@@ -37,40 +44,91 @@ const sections = [
   },
 ]
 
-const toggleItems = [
-  {
-    label: "Email notifications",
-    desc: "Receive attendance alerts via email",
-    key: "email",
-  },
-  {
-    label: "Push notifications",
-    desc: "Get push notifications on your device",
-    key: "push",
-  },
-  {
-    label: "Weekly digest",
-    desc: "Receive a weekly summary every Monday",
-    key: "digest",
-  },
-  {
-    label: "Dark mode",
-    desc: "Use dark theme across the platform",
-    key: "dark",
-  },
-]
-
-export function SettingsPage() {
+export function SettingsPage({
+  user,
+}: {
+  user: {
+    id?: string
+    name?: string | null
+    email?: string | null
+    image?: string | null
+  }
+}) {
   const [activeSection, setActiveSection] = useState("appearance")
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     email: true,
     push: false,
     digest: true,
-    dark: false,
   })
+  const [profile, setProfile] = useState<{
+    name: string | null
+    email: string | null
+    studentId: string | null
+    course: string | null
+    image: string | null
+  } | null>(null)
+  const [rollNo, setRollNo] = useState("")
+  const [course, setCourse] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [notifSaving, setNotifSaving] = useState(false)
+  const [notifSaved, setNotifSaved] = useState(false)
+  const { theme, setTheme } = useTheme()
 
-  const toggle = (key: string) =>
-    setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
+  useEffect(() => {
+    if (user.id) {
+      getUserProfile(user.id).then((p) => {
+        setProfile(p)
+        setRollNo(p?.studentId ?? "")
+        setCourse(p?.course ?? "")
+      })
+      getNotificationPreferences(user.id).then((prefs) => {
+        if (prefs) setToggles(prefs)
+      })
+    }
+  }, [user.id])
+
+  async function handleSave() {
+    if (!user.id) return
+    setSaving(true)
+    await updateUserProfile(user.id, {
+      studentId: rollNo || undefined,
+      course: course || undefined,
+    })
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function toggle(key: string) {
+    const next = { ...toggles, [key]: !toggles[key] }
+    setToggles(next)
+    setNotifSaving(true)
+    if (user.id) await updateNotificationPreferences(user.id, next)
+    setNotifSaving(false)
+    setNotifSaved(true)
+    setTimeout(() => setNotifSaved(false), 2000)
+  }
+
+  const toggleItems = [
+    {
+      label: "Email notifications",
+      desc: "Receive attendance alerts via email",
+      key: "email",
+    },
+    {
+      label: "Push notifications",
+      desc: "Get push notifications on your device",
+      key: "push",
+    },
+    {
+      label: "Weekly digest",
+      desc: "Receive a weekly summary every Monday",
+      key: "digest",
+    },
+  ]
+
+  const initial = user.name?.charAt(0)?.toUpperCase() ?? "U"
 
   return (
     <div className="space-y-8">
@@ -107,77 +165,87 @@ export function SettingsPage() {
         <div className="max-w-2xl flex-1 space-y-6">
           {activeSection === "appearance" && (
             <div className="space-y-4">
-              {toggleItems
-                .filter((t) => t.key === "dark")
-                .map((t) => (
-                  <Card key={t.key}>
-                    <CardContent className="flex items-center justify-between p-5">
-                      <div className="flex items-center gap-3">
-                        <Moon className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {t.label}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.desc}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => toggle(t.key)}
-                        className={`relative h-6 w-11 rounded-full transition ${
-                          toggles[t.key] ? "bg-primary" : "bg-muted"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${
-                            toggles[t.key] ? "translate-x-5" : ""
-                          }`}
-                        />
-                      </button>
-                    </CardContent>
-                  </Card>
-                ))}
-
-              <p className="px-1 text-xs text-muted-foreground">
-                More appearance options coming soon.
-              </p>
+              <Card>
+                <CardContent className="p-5">
+                  <label className="text-xs font-medium text-foreground">
+                    Theme
+                  </label>
+                  <div className="mt-2 flex gap-3">
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "light"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Sun className="h-4 w-4" /> Light
+                    </button>
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "dark"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Moon className="h-4 w-4" /> Dark
+                    </button>
+                    <button
+                      onClick={() => setTheme("system")}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm transition ${
+                        theme === "system"
+                          ? "border-primary bg-primary/10 font-medium text-primary"
+                          : "border-muted text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Globe className="h-4 w-4" /> System
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {activeSection === "notifications" && (
             <div className="space-y-3">
-              {toggleItems
-                .filter((t) => t.key !== "dark")
-                .map((t) => (
-                  <Card key={t.key}>
-                    <CardContent className="flex items-center justify-between p-5">
-                      <div className="flex items-center gap-3">
-                        <Bell className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {t.label}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.desc}
-                          </p>
-                        </div>
+              {toggleItems.map((t) => (
+                <Card key={t.key}>
+                  <CardContent className="flex items-center justify-between p-5">
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {t.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t.desc}
+                        </p>
                       </div>
-                      <button
-                        onClick={() => toggle(t.key)}
-                        className={`relative h-6 w-11 rounded-full transition ${
-                          toggles[t.key] ? "bg-primary" : "bg-muted"
+                    </div>
+                    <button
+                      onClick={() => toggle(t.key)}
+                      className={`relative h-6 w-11 rounded-full transition ${
+                        toggles[t.key] ? "bg-primary" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                          toggles[t.key] ? "translate-x-5" : ""
                         }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition ${
-                            toggles[t.key] ? "translate-x-5" : ""
-                          }`}
-                        />
-                      </button>
-                    </CardContent>
-                  </Card>
-                ))}
+                      />
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+              {notifSaving && (
+                <p className="text-xs text-muted-foreground">Saving...</p>
+              )}
+              {notifSaved && (
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  Preferences saved!
+                </p>
+              )}
             </div>
           )}
 
@@ -185,38 +253,76 @@ export function SettingsPage() {
             <Card>
               <CardContent className="space-y-5 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
-                    U
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
+                    {initial}
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">User Name</p>
+                    <p className="font-semibold text-foreground">
+                      {profile?.name ?? user.name ?? "User"}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      user@example.com
+                      {profile?.email ?? user.email ?? ""}
                     </p>
                   </div>
                 </div>
-                {["Full Name", "Email", "Student ID"].map((field) => (
-                  <div key={field}>
-                    <label className="text-xs font-medium text-foreground">
-                      {field}
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={
-                        field === "Full Name"
-                          ? "User Name"
-                          : field === "Email"
-                            ? "user@example.com"
-                            : "STU-2024-001"
-                      }
-                      className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
-                      readOnly
-                    />
-                  </div>
-                ))}
-                <button className="rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90">
-                  Save Changes
-                </button>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={profile?.name ?? user.name ?? ""}
+                    readOnly
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Email
+                  </label>
+                  <input
+                    type="text"
+                    value={profile?.email ?? user.email ?? ""}
+                    readOnly
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Roll No
+                  </label>
+                  <input
+                    type="text"
+                    value={rollNo}
+                    onChange={(e) => setRollNo(e.target.value)}
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Course
+                  </label>
+                  <input
+                    type="text"
+                    value={course}
+                    onChange={(e) => setCourse(e.target.value)}
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                  {saved && (
+                    <span className="text-xs text-green-600 dark:text-green-400">
+                      Saved!
+                    </span>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}

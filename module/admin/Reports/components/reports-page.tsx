@@ -4,13 +4,17 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   BarChart3,
-  Download,
+  FileSpreadsheet,
+  FileDown,
   FileText,
   TrendingUp,
   TrendingDown,
   Loader2,
 } from "lucide-react"
 import { getAdminReports } from "@/module/admin/Reports/actions/actions"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
+import ExcelJS from "exceljs"
 
 type AdminReportsData = {
   totalStudents: number
@@ -31,6 +35,59 @@ type AdminReportsData = {
     present: number
     total: number
   }[]
+}
+
+async function downloadExcel(
+  filename: string,
+  sheets: { name: string; headers: string[]; rows: (string | number)[][] }[]
+) {
+  const wb = new ExcelJS.Workbook()
+  for (const s of sheets) {
+    const ws = wb.addWorksheet(s.name)
+    ws.addRow(s.headers)
+    for (const row of s.rows) ws.addRow(row)
+  }
+  const buf = await wb.xlsx.writeBuffer()
+  const blob = new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function downloadPDF(
+  filename: string,
+  title: string,
+  tables: { header: string; headers: string[]; rows: (string | number)[][] }[]
+) {
+  const doc = new jsPDF()
+  doc.setFontSize(16)
+  doc.text(title, 14, 20)
+  let y = 30
+  for (const t of tables) {
+    if (y > 250) {
+      doc.addPage()
+      y = 20
+    }
+    doc.setFontSize(12)
+    doc.text(t.header, 14, y)
+    y += 5
+    autoTable(doc, {
+      startY: y,
+      head: [t.headers],
+      body: t.rows,
+      theme: "striped",
+      margin: { left: 14 },
+    })
+    y =
+      (doc as import("jspdf").jsPDF & { lastAutoTable?: { finalY: number } })
+        .lastAutoTable?.finalY + 15 || y + 40
+  }
+  doc.save(filename)
 }
 
 export function ReportsPage() {
@@ -105,9 +162,66 @@ export function ReportsPage() {
             Institution-wide analytics and summaries
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted">
-          <Download className="h-4 w-4" /> Export All
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              downloadExcel("admin-reports.xlsx", [
+                {
+                  name: "Monthly",
+                  headers: ["Month", "Percentage", "Present", "Total"],
+                  rows: (data?.monthlyTrend ?? []).map((m) => [
+                    m.month,
+                    m.percentage,
+                    m.present,
+                    m.total,
+                  ]),
+                },
+                {
+                  name: "Subjects",
+                  headers: ["Subject", "Percentage", "Present", "Total"],
+                  rows: (data?.subjectWise ?? []).map((s) => [
+                    s.subject,
+                    s.percentage,
+                    s.present,
+                    s.total,
+                  ]),
+                },
+              ]).catch(() => {})
+            }}
+            className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+          >
+            <FileSpreadsheet className="h-4 w-4" /> Excel
+          </button>
+          <button
+            onClick={() =>
+              downloadPDF("admin-reports.pdf", "Institution Reports", [
+                {
+                  header: "Monthly Trend",
+                  headers: ["Month", "Percentage", "Present", "Total"],
+                  rows: (data?.monthlyTrend ?? []).map((m) => [
+                    m.month,
+                    `${m.percentage}%`,
+                    String(m.present),
+                    String(m.total),
+                  ]),
+                },
+                {
+                  header: "Subject-wise",
+                  headers: ["Subject", "Percentage", "Present", "Total"],
+                  rows: (data?.subjectWise ?? []).map((s) => [
+                    s.subject,
+                    `${s.percentage}%`,
+                    String(s.present),
+                    String(s.total),
+                  ]),
+                },
+              ])
+            }
+            className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+          >
+            <FileDown className="h-4 w-4" /> PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -217,30 +331,58 @@ export function ReportsPage() {
         <div className="space-y-2">
           {[
             {
+              key: "monthly",
               title: "Institution Attendance Summary",
               date:
                 data.monthlyTrend.length > 0
                   ? monthLabel(data.monthlyTrend[0].month)
                   : "N/A",
-              type: "PDF",
+              headers: ["Month", "Percentage", "Present", "Total"],
+              rows: data.monthlyTrend.map((m) => [
+                m.month,
+                m.percentage,
+                m.present,
+                m.total,
+              ]),
+              pdfRows: data.monthlyTrend.map((m) => [
+                m.month,
+                `${m.percentage}%`,
+                String(m.present),
+                String(m.total),
+              ]),
             },
             {
+              key: "subjects",
               title: "Course-wise Performance",
               date: `${data.subjectWise.length} subjects`,
-              type: "PDF",
+              headers: ["Subject", "Percentage", "Present", "Total"],
+              rows: data.subjectWise.map((s) => [
+                s.subject,
+                s.percentage,
+                s.present,
+                s.total,
+              ]),
+              pdfRows: data.subjectWise.map((s) => [
+                s.subject,
+                `${s.percentage}%`,
+                String(s.present),
+                String(s.total),
+              ]),
             },
             {
+              key: "at-risk",
               title: "Student Drop-out Risk Analysis",
               date: `${data.atRiskCount} at-risk students`,
-              type: "CSV",
+              headers: ["Subject", "At-Risk Students"],
+              rows: data.subjectWise
+                .filter((s) => s.percentage < 50)
+                .map((s) => [s.subject, "Yes"]),
+              pdfRows: data.subjectWise
+                .filter((s) => s.percentage < 50)
+                .map((s) => [s.subject, "At Risk"]),
             },
-            {
-              title: "Faculty Workload Report",
-              date: `Spring 2026`,
-              type: "PDF",
-            },
-          ].map((r, i) => (
-            <Card key={i} className="transition hover:shadow-sm">
+          ].map((r) => (
+            <Card key={r.key} className="transition hover:shadow-sm">
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
@@ -250,17 +392,33 @@ export function ReportsPage() {
                     <p className="truncate text-sm font-medium text-foreground">
                       {r.title}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {r.date} · {r.type}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{r.date}</p>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600">
-                    Ready
-                  </span>
-                  <button className="rounded-lg border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted">
-                    Download
+                  <button
+                    onClick={() => {
+                      downloadExcel(`${r.key}-report.xlsx`, [
+                        { name: r.title, headers: r.headers, rows: r.rows },
+                      ]).catch(() => {})
+                    }}
+                    className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+                  </button>
+                  <button
+                    onClick={() =>
+                      downloadPDF(`${r.key}-report.pdf`, r.title, [
+                        {
+                          header: r.title,
+                          headers: r.headers,
+                          rows: r.pdfRows,
+                        },
+                      ])
+                    }
+                    className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
+                  >
+                    <FileDown className="h-3.5 w-3.5" /> PDF
                   </button>
                 </div>
               </CardContent>

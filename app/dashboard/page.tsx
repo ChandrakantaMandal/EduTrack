@@ -6,13 +6,15 @@ import { MonthlyTrend } from "@/module/user/dashboard/components/bar-chart"
 import { AttendanceCard } from "@/module/user/dashboard/components/attendance-card"
 import { BookOpen, TrendingUp, CalendarCheck, Award } from "lucide-react"
 import { getStudentDashboardData } from "@/module/user/dashboard/actions/actions"
+import { getUserProfile } from "@/module/user/Settings/actions/actions"
 
 export default async function Dashboard() {
   const { user } = await requireAuth()
-  const data = await getStudentDashboardData(user.id!)
+  const data = await getStudentDashboardData(user.id)
+  const profile = await getUserProfile(user.id)
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout user={{ ...user, ...profile }}>
       <div className="space-y-8">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>

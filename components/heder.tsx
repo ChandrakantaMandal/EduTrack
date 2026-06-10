@@ -11,7 +11,13 @@ export function Header({
   user,
   userId,
 }: {
-  user: { name?: string | null; email?: string | null; image?: string | null }
+  user: {
+    name?: string | null
+    email?: string | null
+    image?: string | null
+    studentId?: string | null
+    course?: string | null
+  }
   userId?: string
 }) {
   const [open, setOpen] = useState(false)

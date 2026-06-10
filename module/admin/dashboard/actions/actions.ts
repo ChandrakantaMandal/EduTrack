@@ -131,3 +131,36 @@ export async function getAdminDashboardData() {
     alerts,
   }
 }
+
+export async function generateRollNumbers() {
+  const users = await prisma.user.findMany({
+    where: { studentId: null },
+    orderBy: { name: "asc" },
+  })
+
+  const lastRoll = await prisma.user.findFirst({
+    where: { studentId: { not: null } },
+    orderBy: { studentId: "desc" },
+    select: { studentId: true },
+  })
+
+  let nextNum = 1
+  if (lastRoll?.studentId) {
+    const parts = lastRoll.studentId.split("-")
+    const lastNum = parseInt(parts[parts.length - 1], 10)
+    if (!isNaN(lastNum)) nextNum = lastNum + 1
+  }
+
+  const year = new Date().getFullYear()
+  let count = 0
+  for (const user of users) {
+    const roll = `STU-${year}-${String(nextNum + count).padStart(3, "0")}`
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { studentId: roll },
+    })
+    count++
+  }
+
+  return { assigned: count }
+}

@@ -28,6 +28,8 @@ export function UsersPage() {
   const [search, setSearch] = useState("")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState("")
+  const [locked, setLocked] = useState(false)
 
   useEffect(() => {
     getSubjects().then((s) => {
@@ -45,15 +47,24 @@ export function UsersPage() {
         map[r.userId] = r.present
       }
       setAttendance(map)
+      setLocked(records.length > 0)
       setSaved(false)
+      setError("")
     })
   }, [selectedSubject, date])
 
-  const filtered = students.filter(
-    (e) =>
-      e.name?.toLowerCase().includes(search.toLowerCase()) ||
-      e.email?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = students
+    .filter(
+      (e) =>
+        e.name?.toLowerCase().includes(search.toLowerCase()) ||
+        e.email?.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!a.studentId && !b.studentId) return 0
+      if (!a.studentId) return 1
+      if (!b.studentId) return -1
+      return a.studentId.localeCompare(b.studentId)
+    })
 
   function setPresent(userId: string) {
     setAttendance((prev) => ({ ...prev, [userId]: true }))
@@ -68,13 +79,26 @@ export function UsersPage() {
   async function handleSave() {
     if (!selectedSubject) return
     setSaving(true)
-    const records = Object.entries(attendance).map(([userId, present]) => ({
-      userId,
-      present,
-    }))
-    await saveAttendance(selectedSubject, date, records)
-    setSaving(false)
-    setSaved(true)
+    setError("")
+    try {
+      const records = Object.entries(attendance).map(([userId, present]) => ({
+        userId,
+        present,
+      }))
+      await saveAttendance(selectedSubject, date, records)
+      const freshRecords = await getAttendanceRecords(selectedSubject, date)
+      const map: Record<string, boolean> = {}
+      for (const r of freshRecords) {
+        map[r.userId] = r.present
+      }
+      setAttendance(map)
+      setLocked(true)
+      setSaving(false)
+      setSaved(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Save failed")
+      setSaving(false)
+    }
   }
 
   const markedCount = Object.keys(attendance).length
@@ -99,13 +123,17 @@ export function UsersPage() {
             onChange={(e) => {
               setDate(e.target.value)
               setSaved(false)
+              setError("")
             }}
             className="bg-transparent text-sm text-foreground outline-none"
           />
         </div>
         <select
           value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
+          onChange={(e) => {
+            setSelectedSubject(e.target.value)
+            setError("")
+          }}
           className="rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
         >
           {subjects.map((s) => (
@@ -128,9 +156,11 @@ export function UsersPage() {
 
       <Card>
         <CardContent className="p-0">
-          <div className="hidden grid-cols-4 gap-4 border-b px-5 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
-            <span className="col-span-2">Student</span>
+          <div className="hidden grid-cols-5 gap-4 border-b px-5 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
+            <span>Name</span>
+            <span>Roll No</span>
             <span>Course</span>
+            <span>Email</span>
             <span className="text-right">Mark</span>
           </div>
           {filtered.length === 0 ? (
@@ -143,9 +173,9 @@ export function UsersPage() {
               return (
                 <div
                   key={u.id}
-                  className="grid grid-cols-1 items-center gap-3 border-b px-5 py-4 transition last:border-0 hover:bg-muted/30 sm:grid-cols-4 sm:gap-4"
+                  className="grid grid-cols-1 items-center gap-3 border-b px-5 py-4 transition last:border-0 hover:bg-muted/30 sm:grid-cols-5 sm:gap-4"
                 >
-                  <div className="col-span-2 flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <div
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
                         isPresent === true
@@ -157,35 +187,42 @@ export function UsersPage() {
                     >
                       {u.name?.charAt(0) ?? "?"}
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {u.name}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {u.studentId ?? u.email}
-                      </p>
-                    </div>
+                    <span className="truncate text-sm font-medium text-foreground">
+                      {u.name}
+                    </span>
+                  </div>
+                  <div className="text-sm text-foreground">
+                    {u.studentId ?? "—"}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {u.course ?? "—"}
                   </div>
+                  <div className="truncate text-sm text-muted-foreground">
+                    {u.email}
+                  </div>
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => setPresent(u.id)}
+                      disabled={locked}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
                         isPresent === true
                           ? "border-green-500 bg-green-500/10 text-green-600"
-                          : "border-muted text-muted-foreground hover:border-green-300"
+                          : locked
+                            ? "cursor-not-allowed border-muted text-muted-foreground opacity-40"
+                            : "border-muted text-muted-foreground hover:border-green-300"
                       }`}
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setAbsent(u.id)}
+                      disabled={locked}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
                         isPresent === false
                           ? "border-red-500 bg-red-500/10 text-red-600"
-                          : "border-muted text-muted-foreground hover:border-red-300"
+                          : locked
+                            ? "cursor-not-allowed border-muted text-muted-foreground opacity-40"
+                            : "border-muted text-muted-foreground hover:border-red-300"
                       }`}
                     >
                       <X className="h-4 w-4" />
@@ -204,15 +241,25 @@ export function UsersPage() {
           {saved && (
             <span className="ml-2 font-medium text-green-600">Saved</span>
           )}
+          {error && (
+            <span className="ml-2 font-medium text-red-600">{error}</span>
+          )}
         </p>
-        <button
-          onClick={handleSave}
-          disabled={markedCount === 0 || saving}
-          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-40"
-        >
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          {saving ? "Saving..." : "Save Attendance"}
-        </button>
+        {!locked && (
+          <button
+            onClick={handleSave}
+            disabled={markedCount === 0 || saving}
+            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-40"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? "Saving..." : "Save Attendance"}
+          </button>
+        )}
+        {locked && (
+          <span className="text-xs font-medium text-muted-foreground">
+            Attendance locked
+          </span>
+        )}
       </div>
     </div>
   )

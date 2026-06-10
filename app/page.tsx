@@ -4,14 +4,12 @@ import {
   BarChart3,
   Bell,
   Shield,
-  Check,
   ArrowRight,
   Star,
   ChevronRight,
   Quote,
   Sparkles,
 } from "lucide-react"
-import { requireUnAuth } from "@/module/auth/utils/auth-utils"
 
 const features = [
   {
@@ -114,7 +112,7 @@ export default async function Page() {
 
       {/* Hero */}
       <section className="relative flex flex-col items-center justify-center overflow-hidden px-5 pt-12 pb-10 text-center sm:px-6 sm:pt-16 sm:pb-12">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
 
         <div className="animate-fade-in inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-xs text-muted-foreground">
           <Sparkles className="h-3.5 w-3.5 text-primary" />

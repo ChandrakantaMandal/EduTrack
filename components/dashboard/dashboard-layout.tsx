@@ -4,11 +4,10 @@ import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/heder"
 import { Menu, X } from "lucide-react"
-import { ViewSchedule } from "@/components/schedule"
 
 interface Props {
   user: {
-    id?: string
+    id: string
     name?: string | null
     email?: string | null
     image?: string | null

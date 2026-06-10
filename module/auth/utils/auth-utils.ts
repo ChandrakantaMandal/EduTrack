@@ -1,14 +1,14 @@
 "use server"
-import { auth } from "@/lib/auth"
+import { auth, authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { Session } from "next-auth"
 
 type AuthenticatedSession = Session & {
-  user: NonNullable<Session["user"]>
+  user: NonNullable<Session["user"]> & { id: string }
 }
 
 export async function requireAuth(): Promise<AuthenticatedSession> {
-  const session = await auth()
+  const session = await auth(authOptions)
 
   if (!session) {
     redirect("/login")
