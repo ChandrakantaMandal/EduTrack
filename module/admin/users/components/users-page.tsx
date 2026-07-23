@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Check, X, Calendar, Loader2 } from "lucide-react"
+import { Search, Check, X, Calendar, Loader2, Download } from "lucide-react"
 import {
   getSubjects,
   getUsers,
   getAttendanceRecords,
   saveAttendance,
 } from "@/module/admin/dashboard/actions/actions"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 type Subject = { id: string; name: string }
 type Student = {
@@ -102,6 +104,49 @@ export function UsersPage() {
   }
 
   const markedCount = Object.keys(attendance).length
+
+  const selectedSubjectName =
+    subjects.find((s) => s.id === selectedSubject)?.name ?? "Subject"
+
+  function handleDownloadPdf() {
+    const doc = new jsPDF()
+
+    doc.setFontSize(16)
+    doc.text("Attendance Report", 14, 20)
+
+    doc.setFontSize(11)
+    doc.text(`Subject: ${selectedSubjectName}`, 14, 30)
+    doc.text(`Date: ${date}`, 14, 37)
+
+    const presentCount = Object.values(attendance).filter(Boolean).length
+    const absentCount = markedCount - presentCount
+    doc.text(
+      `Summary: ${presentCount} Present, ${absentCount} Absent, ${markedCount} Total`,
+      14,
+      44
+    )
+
+    const rows = filtered.map((u) => [
+      u.studentId ?? "—",
+      u.name ?? "—",
+      u.course ?? "—",
+      attendance[u.id] === true
+        ? "Present"
+        : attendance[u.id] === false
+          ? "Absent"
+          : "Unmarked",
+    ])
+
+    autoTable(doc, {
+      startY: 50,
+      head: [["Roll No", "Name", "Course", "Status"]],
+      body: rows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [37, 99, 235] },
+    })
+
+    doc.save(`attendance-${selectedSubjectName}-${date}.pdf`)
+  }
 
   return (
     <div className="space-y-6">
@@ -256,9 +301,13 @@ export function UsersPage() {
           </button>
         )}
         {locked && (
-          <span className="text-xs font-medium text-muted-foreground">
-            Attendance locked
-          </span>
+          <button
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-2 rounded-xl border border-muted bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted/50"
+          >
+            <Download className="h-4 w-4" />
+            Download PDF
+          </button>
         )}
       </div>
     </div>

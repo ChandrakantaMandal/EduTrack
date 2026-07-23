@@ -83,9 +83,9 @@ function downloadPDF(
       theme: "striped",
       margin: { left: 14 },
     })
-    y =
-      (doc as import("jspdf").jsPDF & { lastAutoTable?: { finalY: number } })
-        .lastAutoTable?.finalY + 15 || y + 40
+    const lastTable = (doc as unknown as { lastAutoTable?: { finalY: number } })
+      .lastAutoTable
+    y = lastTable ? lastTable.finalY + 15 : y + 40
   }
   doc.save(filename)
 }
