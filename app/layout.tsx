@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "EduTrack",
+  icons: [{ rel: "icon", url: "/logo.png" }],
 }
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })

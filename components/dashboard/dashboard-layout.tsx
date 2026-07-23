@@ -3,7 +3,10 @@
 import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/heder"
-import { Menu, X } from "lucide-react"
+import { ViewSchedule } from "@/components/schedule"
+import { ProfileMenu } from "@/components/profile"
+import { NotificationsBell } from "@/components/notifications"
+import { Calendar, Menu, X } from "lucide-react"
 import Image from "next/image"
 
 interface Props {
@@ -18,6 +21,7 @@ interface Props {
 
 export function DashboardLayout({ user, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -63,16 +67,23 @@ export function DashboardLayout({ user, children }: Props) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Image
-            src="/logo.png"
-            alt="EduTrack"
-            width={90}
-            height={24}
-            className="h-6 w-auto"
-          />
+          <div className="flex items-center gap-2">
+            <NotificationsBell userId={user.id} />
+            <Calendar
+              className="h-6 w-6"
+              onClick={() => setScheduleOpen(true)}
+            />
+            <ProfileMenu user={user} />
+          </div>
         </div>
 
-        <Header user={user} userId={user.id} />
+        <div className="hidden lg:block">
+          <Header user={user} userId={user.id} />
+        </div>
+        <ViewSchedule
+          open={scheduleOpen}
+          onClose={() => setScheduleOpen(false)}
+        />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           {children}
         </main>
