@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
-  title: "Alpha",
+  title: "EduTrack",
 }
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })

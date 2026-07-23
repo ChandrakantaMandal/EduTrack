@@ -2,10 +2,21 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { BookOpen, Search, Clock, Plus, X, Loader2 } from "lucide-react"
+import {
+  BookOpen,
+  Search,
+  Clock,
+  Plus,
+  X,
+  Pencil,
+  Trash2,
+  Loader2,
+} from "lucide-react"
 import {
   getAllSubjects,
   createSubject,
+  updateSubject,
+  deleteSubject,
 } from "@/module/admin/subjects/actions/actions"
 
 type Subject = {
@@ -27,7 +38,9 @@ export function SubjectsPage() {
     professor: "",
     day: "",
   })
-  const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState<Subject | null>(null)
+  const [deleting, setDeleting] = useState<Subject | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     getAllSubjects().then((s) => {
@@ -44,18 +57,42 @@ export function SubjectsPage() {
     s.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  async function handleCreate() {
+  async function handleSave() {
     if (!form.name || !form.code) return
-    setCreating(true)
-    await createSubject({
+    setSaving(true)
+    const data = {
       name: form.name,
       code: form.code,
       professor: form.professor || undefined,
       day: form.day || undefined,
-    })
-    setCreating(false)
+    }
+    if (editing) {
+      await updateSubject(editing.id, data)
+    } else {
+      await createSubject(data)
+    }
+    setSaving(false)
     setShowForm(false)
+    setEditing(null)
     setForm({ name: "", code: "", professor: "", day: "" })
+    load()
+  }
+
+  function openEdit(subject: Subject) {
+    setEditing(subject)
+    setForm({
+      name: subject.name,
+      code: subject.code,
+      professor: subject.professor ?? "",
+      day: subject.schedule ?? "",
+    })
+    setShowForm(true)
+  }
+
+  async function handleDelete() {
+    if (!deleting) return
+    await deleteSubject(deleting.id)
+    setDeleting(null)
     load()
   }
 
@@ -82,7 +119,11 @@ export function SubjectsPage() {
             />
           </div>
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setEditing(null)
+              setForm({ name: "", code: "", professor: "", day: "" })
+              setShowForm(true)
+            }}
             className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" /> Add
@@ -106,9 +147,20 @@ export function SubjectsPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                     <BookOpen className="h-5 w-5 text-primary" />
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {s.code}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEdit(s)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-muted"
+                    >
+                      <Pencil className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <button
+                      onClick={() => setDeleting(s)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="mt-4 font-semibold text-foreground">{s.name}</h3>
                 <p className="text-xs text-muted-foreground">
@@ -128,7 +180,10 @@ export function SubjectsPage() {
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setShowForm(false)}
+          onClick={() => {
+            setShowForm(false)
+            setEditing(null)
+          }}
         >
           <Card
             className="w-full max-w-md"
@@ -137,10 +192,13 @@ export function SubjectsPage() {
             <CardContent className="space-y-4 p-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-foreground">
-                  New Subject
+                  {editing ? "Edit Subject" : "New Subject"}
                 </h2>
                 <button
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditing(null)
+                  }}
                   className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
@@ -189,15 +247,62 @@ export function SubjectsPage() {
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <button
-                  onClick={handleCreate}
-                  disabled={creating || !form.name || !form.code}
+                  onClick={handleSave}
+                  disabled={saving || !form.name || !form.code}
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-40"
                 >
-                  {creating && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {creating ? "Creating..." : "Create Subject"}
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving
+                    ? "Saving..."
+                    : editing
+                      ? "Update Subject"
+                      : "Create Subject"}
                 </button>
                 <button
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditing(null)
+                  }}
+                  className="flex-1 rounded-xl border py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
+                >
+                  Cancel
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {deleting && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setDeleting(null)}
+        >
+          <Card
+            className="w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardContent className="space-y-4 p-6">
+              <h2 className="text-lg font-semibold text-foreground">
+                Delete Subject
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete{" "}
+                <span className="font-medium text-foreground">
+                  {deleting.name}
+                </span>
+                ? This will also remove all related attendance and schedule
+                entries.
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleDelete}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive py-2.5 text-sm font-medium text-destructive-foreground shadow-sm transition hover:opacity-90"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </button>
+                <button
+                  onClick={() => setDeleting(null)}
                   className="flex-1 rounded-xl border py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
                 >
                   Cancel

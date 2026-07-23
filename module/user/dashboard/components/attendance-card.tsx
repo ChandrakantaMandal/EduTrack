@@ -20,7 +20,7 @@ export function CircularProgress({ value }: Props) {
   const offset = circumference - (value / 100) * circumference
 
   return (
-    <div className="relative h-40 w-40">
+    <div className="relative h-36 w-36 sm:h-40 sm:w-40">
       <svg viewBox="0 0 100 100">
         <circle
           cx="50"

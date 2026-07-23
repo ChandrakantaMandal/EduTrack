@@ -31,54 +31,62 @@ export default async function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4">
           <Card className="border-l-4 border-l-primary">
-            <CardContent className="flex items-center gap-4 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-11 sm:w-11">
+            <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-11 sm:w-11">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Subjects</p>
-                <p className="text-lg font-bold sm:text-xl">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-muted-foreground">
+                  Subjects
+                </p>
+                <p className="truncate text-lg font-bold sm:text-xl">
                   {data.subjects.length}
                 </p>
               </div>
             </CardContent>
           </Card>
           <Card className="border-l-4 border-l-secondary">
-            <CardContent className="flex items-center gap-4 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/10 sm:h-11 sm:w-11">
+            <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/10 sm:h-11 sm:w-11">
                 <TrendingUp className="h-5 w-5 text-secondary" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Avg. Attendance</p>
-                <p className="text-lg font-bold sm:text-xl">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-muted-foreground">
+                  Avg. Attendance
+                </p>
+                <p className="truncate text-lg font-bold sm:text-xl">
                   {data.avgAttendance}%
                 </p>
               </div>
             </CardContent>
           </Card>
           <Card className="border-l-4 border-l-accent">
-            <CardContent className="flex items-center gap-4 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 sm:h-11 sm:w-11">
+            <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 sm:h-11 sm:w-11">
                 <Award className="h-5 w-5 text-accent" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Best Subject</p>
-                <p className="text-lg font-bold sm:text-xl">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-muted-foreground">
+                  Best Subject
+                </p>
+                <p className="truncate text-lg font-bold sm:text-xl">
                   {data.bestSubject?.name ?? "—"}
                 </p>
               </div>
             </CardContent>
           </Card>
           <Card className="border-l-4 border-l-destructive">
-            <CardContent className="flex items-center gap-4 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 sm:h-11 sm:w-11">
+            <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive/10 sm:h-11 sm:w-11">
                 <CalendarCheck className="h-5 w-5 text-destructive" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Days Present</p>
-                <p className="text-lg font-bold sm:text-xl">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-muted-foreground">
+                  Days Present
+                </p>
+                <p className="truncate text-lg font-bold sm:text-xl">
                   {data.daysPresent}/{data.totalDays}
                 </p>
               </div>

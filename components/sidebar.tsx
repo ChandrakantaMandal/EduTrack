@@ -44,7 +44,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />
-              <span className="hidden sm:inline">{item.name}</span>
+              <span className="sm:inline">{item.name}</span>
             </Link>
           )
         })}

@@ -10,7 +10,7 @@ export function MonthlyTrend({ data }: { data: Record<string, number> }) {
     <Card className="p-6">
       <h2 className="mb-4 font-semibold">Monthly Trend</h2>
 
-      <div className="flex h-40 items-end gap-4">
+      <div className="flex h-40 items-end gap-2 sm:gap-4">
         {values.length > 0 ? (
           values.map((v, i) => (
             <div

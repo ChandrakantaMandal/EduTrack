@@ -33,63 +33,69 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4">
           <Card>
-            <CardContent className="p-4 sm:p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 sm:h-10 sm:w-10">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">
+              <p className="mt-3 truncate text-lg font-bold text-foreground sm:mt-4 sm:text-2xl">
                 {data.totalStudents}
               </p>
-              <p className="text-xs text-muted-foreground">Total Students</p>
+              <p className="truncate text-xs text-muted-foreground">
+                Total Students
+              </p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 sm:p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/10 sm:h-10 sm:w-10">
                   <BookOpen className="h-5 w-5 text-secondary" />
                 </div>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">
+              <p className="mt-3 truncate text-lg font-bold text-foreground sm:mt-4 sm:text-2xl">
                 {data.totalSubjects}
               </p>
-              <p className="text-xs text-muted-foreground">Active Courses</p>
+              <p className="truncate text-xs text-muted-foreground">
+                Active Courses
+              </p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 sm:p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 sm:h-10 sm:w-10">
                   <TrendingUp className="h-5 w-5 text-accent" />
                 </div>
                 {data.avgAttendance > 0 && (
-                  <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
+                  <span className="flex shrink-0 items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
                     <ArrowUpRight className="h-3 w-3" />
                     {data.avgAttendance}%
                   </span>
                 )}
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">
+              <p className="mt-3 truncate text-lg font-bold text-foreground sm:mt-4 sm:text-2xl">
                 {data.avgAttendance}%
               </p>
-              <p className="text-xs text-muted-foreground">Avg Attendance</p>
+              <p className="truncate text-xs text-muted-foreground">
+                Avg Attendance
+              </p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 sm:p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-destructive/10 sm:h-10 sm:w-10">
                   <UserPlus className="h-5 w-5 text-destructive" />
                 </div>
               </div>
-              <p className="mt-4 text-2xl font-bold text-foreground">
+              <p className="mt-3 truncate text-lg font-bold text-foreground sm:mt-4 sm:text-2xl">
                 {data.recentStudents.length}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground">
                 Recent Registrations
               </p>
             </CardContent>
