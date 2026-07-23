@@ -1,8 +1,9 @@
+import Image from "next/image"
 import Link from "next/link"
 import {
-  GraduationCap,
   BarChart3,
   Bell,
+  GraduationCap,
   Shield,
   ArrowRight,
   Star,
@@ -84,10 +85,13 @@ export default async function Page() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold">EduTrack</span>
-        </div>
+        <Image
+          src="/logo.png"
+          alt="EduTrack"
+          width={100}
+          height={28}
+          className="h-7 w-auto"
+        />
         <div className="flex items-center gap-4">
           <Link
             href="/login"
@@ -296,10 +300,13 @@ export default async function Page() {
 
       <footer className="border-t px-5 py-6 sm:px-6 sm:py-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            <span className="text-sm font-semibold">EduTrack</span>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={90}
+            height={24}
+            className="h-6 w-auto"
+          />
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} EduTrack. All rights reserved.
           </p>

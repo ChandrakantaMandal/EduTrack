@@ -36,7 +36,6 @@ export function SubjectsPage() {
     name: "",
     code: "",
     professor: "",
-    day: "",
   })
   const [editing, setEditing] = useState<Subject | null>(null)
   const [deleting, setDeleting] = useState<Subject | null>(null)
@@ -64,7 +63,6 @@ export function SubjectsPage() {
       name: form.name,
       code: form.code,
       professor: form.professor || undefined,
-      day: form.day || undefined,
     }
     if (editing) {
       await updateSubject(editing.id, data)
@@ -74,7 +72,7 @@ export function SubjectsPage() {
     setSaving(false)
     setShowForm(false)
     setEditing(null)
-    setForm({ name: "", code: "", professor: "", day: "" })
+    setForm({ name: "", code: "", professor: "" })
     load()
   }
 
@@ -84,7 +82,6 @@ export function SubjectsPage() {
       name: subject.name,
       code: subject.code,
       professor: subject.professor ?? "",
-      day: subject.schedule ?? "",
     })
     setShowForm(true)
   }
@@ -121,7 +118,7 @@ export function SubjectsPage() {
           <button
             onClick={() => {
               setEditing(null)
-              setForm({ name: "", code: "", professor: "", day: "" })
+              setForm({ name: "", code: "", professor: "" })
               setShowForm(true)
             }}
             className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
@@ -219,32 +216,6 @@ export function SubjectsPage() {
                   />
                 </div>
               ))}
-              <div>
-                <label className="text-xs font-medium text-foreground">
-                  Day
-                </label>
-                <select
-                  value={form.day}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, day: e.target.value }))
-                  }
-                  className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="">Select day</option>
-                  {[
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                  ].map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={handleSave}

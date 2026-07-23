@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/heder"
 import { Menu, X } from "lucide-react"
+import Image from "next/image"
 
 interface Props {
   user: {
@@ -35,7 +36,13 @@ export function DashboardLayout({ user, children }: Props) {
         }`}
       >
         <div className="flex items-center justify-between border-b p-4 lg:hidden">
-          <h1 className="text-lg font-bold text-primary">EduTrack</h1>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={100}
+            height={28}
+            className="h-7 w-auto"
+          />
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-muted"
@@ -56,7 +63,13 @@ export function DashboardLayout({ user, children }: Props) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-base font-bold text-primary">EduTrack</h1>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={90}
+            height={24}
+            className="h-6 w-auto"
+          />
         </div>
 
         <Header user={user} userId={user.id} />

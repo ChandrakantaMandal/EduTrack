@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { AdminSidebar } from "@/components/admin-sidebar"
-import { Menu, X, Shield, LogOut } from "lucide-react"
+import { Menu, X, LogOut } from "lucide-react"
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { adminLogout } from "@/module/auth/utils/admin-auth-utils"
 
@@ -25,10 +26,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="flex items-center justify-between border-b p-4 lg:hidden">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold text-primary">EduTrack</h1>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={100}
+            height={28}
+            className="h-7 w-auto"
+          />
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-muted"
@@ -47,7 +51,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-base font-bold text-primary">EduTrack</h1>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={90}
+            height={24}
+            className="h-6 w-auto"
+          />
           <div className="w-9" />
         </div>
 

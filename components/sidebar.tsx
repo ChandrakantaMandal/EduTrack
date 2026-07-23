@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { BarChart3, BookOpen, LayoutDashboard, Settings } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -20,7 +21,13 @@ export function Sidebar() {
       {/* Logo */}
       <Link href="/dashboard">
         <div className="mb-10">
-          <h1 className="text-xl font-bold text-primary">EduTrack</h1>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={120}
+            height={32}
+            className="h-8 w-auto"
+          />
           <p className="hidden text-sm text-muted-foreground sm:block">
             Student Portal
           </p>

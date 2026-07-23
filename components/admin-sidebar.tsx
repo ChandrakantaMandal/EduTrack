@@ -10,6 +10,7 @@ import {
   Shield,
   Calendar,
 } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -29,11 +30,14 @@ export function AdminSidebar() {
     <div className="flex h-full flex-col p-6">
       <Link href="/admin/dashboard">
         <div className="mb-10">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold text-primary">EduTrack</h1>
-          </div>
-          <p className="ml-7 text-sm text-muted-foreground">Admin Panel</p>
+          <Image
+            src="/logo.png"
+            alt="EduTrack"
+            width={120}
+            height={32}
+            className="h-8 w-auto"
+          />
+          <p className="text-sm text-muted-foreground">Admin Panel</p>
         </div>
       </Link>
 
