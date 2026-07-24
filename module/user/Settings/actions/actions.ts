@@ -10,6 +10,8 @@ export async function getUserProfile(userId: string) {
       email: true,
       studentId: true,
       course: true,
+      section: true,
+      practicalGroup: true,
       image: true,
     },
   })
@@ -18,11 +20,30 @@ export async function getUserProfile(userId: string) {
 
 export async function updateUserProfile(
   userId: string,
-  data: { studentId?: string; course?: string }
+  data: {
+    studentId?: string
+    course?: string
+    section?: string
+    practicalGroup?: string
+  }
 ) {
   return prisma.user.update({
     where: { id: userId },
     data,
+  })
+}
+
+export async function completeOnboarding(
+  userId: string,
+  data: { studentId: string; section: string; practicalGroup?: string }
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      studentId: data.studentId,
+      section: data.section,
+      practicalGroup: data.practicalGroup || null,
+    },
   })
 }
 

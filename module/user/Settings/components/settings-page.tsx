@@ -65,10 +65,14 @@ export function SettingsPage({
     email: string | null
     studentId: string | null
     course: string | null
+    section: string | null
+    practicalGroup: string | null
     image: string | null
   } | null>(null)
   const [rollNo, setRollNo] = useState("")
   const [course, setCourse] = useState("")
+  const [section, setSection] = useState("")
+  const [practicalGroup, setPracticalGroup] = useState("")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [notifSaving, setNotifSaving] = useState(false)
@@ -81,6 +85,8 @@ export function SettingsPage({
         setProfile(p)
         setRollNo(p?.studentId ?? "")
         setCourse(p?.course ?? "")
+        setSection(p?.section ?? "")
+        setPracticalGroup(p?.practicalGroup ?? "")
       })
       getNotificationPreferences(user.id).then((prefs) => {
         if (prefs) setToggles(prefs)
@@ -94,6 +100,8 @@ export function SettingsPage({
     await updateUserProfile(user.id, {
       studentId: rollNo || undefined,
       course: course || undefined,
+      section: section || undefined,
+      practicalGroup: practicalGroup || undefined,
     })
     setSaving(false)
     setSaved(true)
@@ -306,6 +314,29 @@ export function SettingsPage({
                     type="text"
                     value={course}
                     onChange={(e) => setCourse(e.target.value)}
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Section
+                  </label>
+                  <input
+                    type="text"
+                    value={section}
+                    onChange={(e) => setSection(e.target.value)}
+                    className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">
+                    Practical Group
+                  </label>
+                  <input
+                    type="text"
+                    value={practicalGroup}
+                    onChange={(e) => setPracticalGroup(e.target.value)}
+                    placeholder="Optional"
                     className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>

@@ -17,6 +17,8 @@ interface Props {
     image?: string | null
     studentId?: string | null
     course?: string | null
+    section?: string | null
+    practicalGroup?: string | null
   }
 }
 
@@ -58,6 +60,16 @@ export function ProfileMenu({ user }: Props) {
             {user.course && (
               <span className="truncate text-xs text-muted-foreground">
                 Course: {user.course}
+              </span>
+            )}
+            {user.section && (
+              <span className="truncate text-xs text-muted-foreground">
+                Section: {user.section}
+              </span>
+            )}
+            {user.practicalGroup && (
+              <span className="truncate text-xs text-muted-foreground">
+                Practical: {user.practicalGroup}
               </span>
             )}
           </div>

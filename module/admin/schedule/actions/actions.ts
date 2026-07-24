@@ -27,6 +27,37 @@ export async function getSchedule(includeSubjects = false) {
     startTime: "",
     endTime: "",
     room: null as string | null,
+    group: null as string | null,
+    subjectId: s.id,
+    subject: { id: s.id, name: s.name, code: s.code, professor: s.professor },
+  }))
+  return [...entries, ...subjectEntries].sort(
+    (a, b) => daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day)
+  )
+}
+
+export async function getUserSchedule(group: string | null) {
+  const entries = await prisma.scheduleEntry.findMany({
+    where: {
+      OR: [{ group: null }, { group }],
+    },
+    include: { subject: true },
+    orderBy: [{ day: "asc" }, { startTime: "asc" }],
+  })
+
+  const subjects = await prisma.subject.findMany({
+    where: {
+      schedule: { not: null },
+      id: { notIn: entries.map((e) => e.subjectId) },
+    },
+  })
+  const subjectEntries = subjects.map((s) => ({
+    id: `subject-${s.id}`,
+    day: s.schedule!,
+    startTime: "",
+    endTime: "",
+    room: null as string | null,
+    group: null as string | null,
     subjectId: s.id,
     subject: { id: s.id, name: s.name, code: s.code, professor: s.professor },
   }))
@@ -51,6 +82,7 @@ export async function createScheduleEntry(data: {
   startTime: string
   endTime: string
   room?: string
+  group?: string
 }) {
   return prisma.scheduleEntry.create({ data })
 }
@@ -63,6 +95,7 @@ export async function updateScheduleEntry(
     startTime: string
     endTime: string
     room?: string
+    group?: string
   }
 ) {
   return prisma.scheduleEntry.update({ where: { id }, data })

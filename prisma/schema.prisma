@@ -20,6 +20,8 @@ model User {
   image         String?
   studentId     String?  @unique
   course        String?
+  section      String?
+  practicalGroup String?
   preferences   Json?
 
   accounts   Account[]
@@ -87,8 +89,9 @@ model ScheduleEntry {
   startTime String
   endTime   String
   room      String?
+  group     String?
 
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
-  @@unique([subjectId, day, startTime])
+  @@unique([subjectId, day, startTime, group])
 }

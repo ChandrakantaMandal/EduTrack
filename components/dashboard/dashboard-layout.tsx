@@ -15,6 +15,7 @@ interface Props {
     name?: string | null
     email?: string | null
     image?: string | null
+    practicalGroup?: string | null
   }
   children: React.ReactNode
 }
@@ -83,6 +84,7 @@ export function DashboardLayout({ user, children }: Props) {
         <ViewSchedule
           open={scheduleOpen}
           onClose={() => setScheduleOpen(false)}
+          group={user.practicalGroup}
         />
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
           {children}

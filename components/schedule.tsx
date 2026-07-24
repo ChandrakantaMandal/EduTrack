@@ -1,8 +1,8 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { getSchedule } from "@/module/admin/schedule/actions/actions"
-import { Calendar, Clock, Loader2, X } from "lucide-react"
+import { getUserSchedule } from "@/module/admin/schedule/actions/actions"
+import { Calendar, Clock, Loader2, X, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 
 type ScheduleItem = {
@@ -11,6 +11,7 @@ type ScheduleItem = {
   startTime: string
   endTime: string
   room: string | null
+  group: string | null
   subject: { name: string; code: string; professor: string | null }
 }
 
@@ -26,20 +27,20 @@ const days = [
 interface Props {
   open: boolean
   onClose: () => void
+  group?: string | null
 }
 
-export function ViewSchedule({ open, onClose }: Props) {
+export function ViewSchedule({ open, onClose, group }: Props) {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!open) return
-
-    getSchedule(true).then((s) => {
+    getUserSchedule(group ?? null).then((s) => {
       setSchedule(s as ScheduleItem[])
       setLoading(false)
     })
-  }, [open])
+  }, [open, group])
 
   const grouped = days.map((day) => ({
     day,
@@ -50,6 +51,7 @@ export function ViewSchedule({ open, onClose }: Props) {
         time: s.startTime ? `${s.startTime} - ${s.endTime}` : "All day",
         room: s.room ?? "—",
         professor: s.subject.professor,
+        group: s.group,
       })),
   }))
 
@@ -57,13 +59,13 @@ export function ViewSchedule({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      {/* 🔥 CENTER MODAL */}
       <Card className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl shadow-xl">
-        {/* HEADER */}
         <div className="flex items-center justify-between border-b px-4 py-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-semibold">Weekly Schedule</h2>
+            <h2 className="text-base font-semibold">
+              Weekly Schedule{group ? ` (${group})` : ""}
+            </h2>
           </div>
 
           <button
@@ -74,7 +76,6 @@ export function ViewSchedule({ open, onClose }: Props) {
           </button>
         </div>
 
-        {/* CONTENT */}
         <div className="overflow-y-auto p-5">
           {loading ? (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
@@ -113,6 +114,11 @@ export function ViewSchedule({ open, onClose }: Props) {
                                 <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />{" "}
                                 {course.room}
                               </span>
+                              {course.group && (
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" /> {course.group}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { requireAuth } from "@/module/auth/utils/auth-utils"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,8 +11,13 @@ import { getUserProfile } from "@/module/user/Settings/actions/actions"
 
 export default async function Dashboard() {
   const { user } = await requireAuth()
-  const data = await getStudentDashboardData(user.id)
   const profile = await getUserProfile(user.id)
+
+  if (!profile?.studentId) {
+    redirect("/onboarding")
+  }
+
+  const data = await getStudentDashboardData(user.id)
 
   return (
     <DashboardLayout user={{ ...user, ...profile }}>

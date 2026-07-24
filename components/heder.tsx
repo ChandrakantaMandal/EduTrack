@@ -17,6 +17,8 @@ export function Header({
     image?: string | null
     studentId?: string | null
     course?: string | null
+    section?: string | null
+    practicalGroup?: string | null
   }
   userId?: string
 }) {
@@ -34,7 +36,11 @@ export function Header({
           <ProfileMenu user={user} />
         </div>
       </header>
-      <ViewSchedule open={open} onClose={() => setOpen(false)} />
+      <ViewSchedule
+        open={open}
+        onClose={() => setOpen(false)}
+        group={user.practicalGroup}
+      />
     </>
   )
 }

@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
   Loader2,
+  Users,
 } from "lucide-react"
 import {
   getSubjects,
@@ -26,6 +27,7 @@ type ScheduleItem = {
   startTime: string
   endTime: string
   room: string | null
+  group: string | null
   subjectId: string
   subject: Subject
 }
@@ -38,6 +40,8 @@ const days = [
   "Friday",
   "Saturday",
 ]
+
+const groupOptions = ["", "gr1", "gr2", "gr3", "gr4"]
 
 export function SchedulePage() {
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -52,6 +56,7 @@ export function SchedulePage() {
     startTime: "",
     endTime: "",
     room: "",
+    group: "",
   })
 
   useEffect(() => {
@@ -77,6 +82,7 @@ export function SchedulePage() {
       startTime: "",
       endTime: "",
       room: "",
+      group: "",
     })
     setShowForm(true)
   }
@@ -88,6 +94,7 @@ export function SchedulePage() {
       startTime: entry.startTime,
       endTime: entry.endTime,
       room: entry.room ?? "",
+      group: entry.group ?? "",
     })
     setShowForm(true)
   }
@@ -101,6 +108,7 @@ export function SchedulePage() {
       startTime: form.startTime,
       endTime: form.endTime,
       room: form.room || undefined,
+      group: form.group || undefined,
     }
     if (editing) {
       await updateScheduleEntry(editing.id, data)
@@ -154,10 +162,11 @@ export function SchedulePage() {
 
       <Card>
         <CardContent className="p-0">
-          <div className="hidden grid-cols-5 gap-4 border-b px-5 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
+          <div className="hidden grid-cols-6 gap-4 border-b px-5 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
             <span>Subject</span>
             <span>Time</span>
             <span>Room</span>
+            <span>Group</span>
             <span>Code</span>
             <span className="text-right">Actions</span>
           </div>
@@ -174,7 +183,7 @@ export function SchedulePage() {
             daySchedule.map((entry) => (
               <div
                 key={entry.id}
-                className="grid grid-cols-1 items-center gap-2 border-b px-5 py-4 transition last:border-0 hover:bg-muted/30 sm:grid-cols-5 sm:gap-4"
+                className="grid grid-cols-1 items-center gap-2 border-b px-5 py-4 transition last:border-0 hover:bg-muted/30 sm:grid-cols-6 sm:gap-4"
               >
                 <p className="text-sm font-medium text-foreground">
                   {entry.subject.name}
@@ -186,6 +195,10 @@ export function SchedulePage() {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   {entry.room ?? "—"}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-3.5 w-3.5 shrink-0" />
+                  {entry.group ?? "All"}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
@@ -287,6 +300,24 @@ export function SchedulePage() {
                   placeholder="e.g. Hall A"
                   className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground">
+                  Group
+                </label>
+                <select
+                  value={form.group}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, group: e.target.value }))
+                  }
+                  className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  {groupOptions.map((g) => (
+                    <option key={g} value={g}>
+                      {g || "All groups"}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <button
