@@ -1,11 +1,34 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import { requireAuth } from "@/module/auth/utils/auth-utils"
+
+export async function GET() {
+  try {
+    const { user } = await requireAuth()
+    const profile = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        studentId: true,
+        section: true,
+        practicalGroup: true,
+      },
+    })
+    return NextResponse.json({ user: profile })
+  } catch (err) {
+    console.error("[onboarding] GET error:", err)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+}
 
 export async function POST(req: Request) {
   try {
-    const { userId, studentId, section, practicalGroup } = await req.json()
+    const { user } = await requireAuth()
+    const { studentId, section, practicalGroup } = await req.json()
 
-    if (!userId || !studentId || !section) {
+    if (!studentId || !section) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -13,7 +36,7 @@ export async function POST(req: Request) {
     }
 
     const existing = await prisma.user.findUnique({ where: { studentId } })
-    if (existing && existing.id !== userId) {
+    if (existing && existing.id !== user.id) {
       return NextResponse.json(
         { error: "Roll number is already taken" },
         { status: 409 }
@@ -21,7 +44,7 @@ export async function POST(req: Request) {
     }
 
     await prisma.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: {
         studentId,
         section,

@@ -17,11 +17,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <OnboardingForm
-        userId={user.id}
-        name={profile?.name ?? ""}
-        email={profile?.email ?? ""}
-      />
+      <OnboardingForm name={profile?.name ?? ""} email={profile?.email ?? ""} />
     </div>
   )
 }

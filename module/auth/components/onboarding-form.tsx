@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation"
 import { PRACTICAL_GROUPS } from "@/lib/constants"
 
 type Props = {
-  userId: string
   name: string
   email: string
 }
 
-export function OnboardingForm({ userId, name, email }: Props) {
+export function OnboardingForm({ name, email }: Props) {
   const router = useRouter()
   const [studentId, setStudentId] = useState("")
   const [section, setSection] = useState("")
@@ -37,7 +36,6 @@ export function OnboardingForm({ userId, name, email }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
           studentId: studentId.trim(),
           section: section.trim(),
           practicalGroup: practicalGroup.trim(),
