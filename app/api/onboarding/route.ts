@@ -26,7 +26,8 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({ ok: true })
-  } catch {
+  } catch (err) {
+    console.error("[onboarding] POST error:", err)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
