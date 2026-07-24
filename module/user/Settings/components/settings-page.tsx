@@ -10,6 +10,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
 } from "@/module/user/Settings/actions/actions"
+import { PRACTICAL_GROUPS } from "@/lib/constants"
 
 const sections = [
   {
@@ -332,13 +333,18 @@ export function SettingsPage({
                   <label className="text-xs font-medium text-foreground">
                     Practical Group
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={practicalGroup}
                     onChange={(e) => setPracticalGroup(e.target.value)}
-                    placeholder="Optional"
                     className="mt-1 w-full rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                  >
+                    <option value="">None</option>
+                    {PRACTICAL_GROUPS.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex items-center gap-3">
                   <button

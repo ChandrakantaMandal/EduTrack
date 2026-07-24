@@ -22,7 +22,11 @@ export async function POST(req: Request) {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { studentId, section, practicalGroup: practicalGroup || null },
+      data: {
+        studentId,
+        section,
+        practicalGroup: practicalGroup ? practicalGroup.toLowerCase() : null,
+      },
     })
 
     return NextResponse.json({ ok: true })

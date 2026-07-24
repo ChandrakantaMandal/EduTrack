@@ -29,7 +29,12 @@ export async function updateUserProfile(
 ) {
   return prisma.user.update({
     where: { id: userId },
-    data,
+    data: {
+      ...data,
+      practicalGroup: data.practicalGroup
+        ? data.practicalGroup.toLowerCase()
+        : data.practicalGroup,
+    },
   })
 }
 
@@ -42,7 +47,9 @@ export async function completeOnboarding(
     data: {
       studentId: data.studentId,
       section: data.section,
-      practicalGroup: data.practicalGroup || null,
+      practicalGroup: data.practicalGroup
+        ? data.practicalGroup.toLowerCase()
+        : null,
     },
   })
 }

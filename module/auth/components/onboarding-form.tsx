@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { PRACTICAL_GROUPS } from "@/lib/constants"
 
 type Props = {
   userId: string
@@ -105,14 +106,19 @@ export function OnboardingForm({ userId, name, email }: Props) {
             Practical Group{" "}
             <span className="text-muted-foreground">(optional)</span>
           </label>
-          <input
+          <select
             id="practicalGroup"
-            type="text"
             value={practicalGroup}
             onChange={(e) => setPracticalGroup(e.target.value)}
             className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="e.g. G1"
-          />
+          >
+            <option value="">None</option>
+            {PRACTICAL_GROUPS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}

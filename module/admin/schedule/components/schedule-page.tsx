@@ -19,6 +19,7 @@ import {
   updateScheduleEntry,
   deleteScheduleEntry,
 } from "@/module/admin/schedule/actions/actions"
+import { PRACTICAL_GROUPS } from "@/lib/constants"
 
 type Subject = { id: string; name: string; code: string }
 type ScheduleItem = {
@@ -41,7 +42,7 @@ const days = [
   "Saturday",
 ]
 
-const groupOptions = ["", "gr1", "gr2", "gr3", "gr4"]
+const groupOptions = ["", ...PRACTICAL_GROUPS]
 
 export function SchedulePage() {
   const [subjects, setSubjects] = useState<Subject[]>([])
