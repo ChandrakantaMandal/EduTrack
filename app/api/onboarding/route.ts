@@ -43,9 +43,17 @@ export async function POST(req: Request) {
       )
     }
 
-    await prisma.user.update({
+    await prisma.user.upsert({
       where: { id: user.id },
-      data: {
+      create: {
+        id: user.id,
+        name: user.name ?? "",
+        email: user.email ?? "",
+        studentId,
+        section,
+        practicalGroup: practicalGroup ? practicalGroup.toLowerCase() : null,
+      },
+      update: {
         studentId,
         section,
         practicalGroup: practicalGroup ? practicalGroup.toLowerCase() : null,
