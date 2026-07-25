@@ -11,6 +11,8 @@ import {
   updateNotificationPreferences,
 } from "@/module/user/Settings/actions/actions"
 import { PRACTICAL_GROUPS } from "@/lib/constants"
+import { Avatar } from "@/components/ui/avatar"
+import { AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 
 const sections = [
   {
@@ -137,8 +139,6 @@ export function SettingsPage({
     },
   ]
 
-  const initial = user.name?.charAt(0)?.toUpperCase() ?? "U"
-
   return (
     <div className="space-y-8">
       <div>
@@ -262,9 +262,17 @@ export function SettingsPage({
             <Card>
               <CardContent className="space-y-5 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
-                    {initial}
-                  </div>
+                  <Avatar className="h-15 w-15">
+                    <AvatarImage
+                      src={user.image ?? ""}
+                      alt={user.name ?? ""}
+                      referrerPolicy="no-referrer"
+                      className="aspect-square size-full rounded-full object-cover"
+                    />
+                    <AvatarFallback>
+                      {user.name?.charAt(0)?.toUpperCase() ?? "U"}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <p className="font-semibold text-foreground">
                       {profile?.name ?? user.name ?? "User"}

@@ -7,7 +7,7 @@ import {
   BookOpen,
   BarChart3,
   Settings,
-  Shield,
+  UserCheck,
   Calendar,
 } from "lucide-react"
 import Image from "next/image"
@@ -17,6 +17,7 @@ import { usePathname } from "next/navigation"
 const items = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
   { name: "Users", icon: Users, href: "/admin/users" },
+  { name: "Attendance", icon: UserCheck, href: "/admin/attendance" },
   { name: "Subjects", icon: BookOpen, href: "/admin/subjects" },
   { name: "Reports", icon: BarChart3, href: "/admin/reports" },
   { name: "Schedule", icon: Calendar, href: "/admin/schedule" },

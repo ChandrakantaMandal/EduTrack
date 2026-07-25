@@ -21,7 +21,7 @@ type Student = {
   course: string | null
 }
 
-export function UsersPage() {
+export function AttendancePage() {
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [selectedSubject, setSelectedSubject] = useState("")
   const [date, setDate] = useState(new Date().toISOString().split("T")[0])

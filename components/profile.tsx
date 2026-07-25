@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { User, Settings, LogOut, ChevronRight } from "lucide-react"
 
 interface Props {
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export function ProfileMenu({ user }: Props) {
+  const router = useRouter()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -78,7 +81,10 @@ export function ProfileMenu({ user }: Props) {
         <div className="my-2 h-px bg-border" />
 
         <div className="space-y-1">
-          <DropdownMenuItem className="group flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-muted">
+          <DropdownMenuItem
+            onClick={() => router.push("/dashboard/settings")}
+            className="group flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-muted"
+          >
             <div className="flex items-center gap-2 text-foreground">
               <User className="h-4 w-4 opacity-70 group-hover:opacity-100" />
               View Profile
@@ -86,7 +92,10 @@ export function ProfileMenu({ user }: Props) {
             <ChevronRight className="h-4 w-4 opacity-40 transition group-hover:translate-x-1" />
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="group flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-muted">
+          <DropdownMenuItem
+            onClick={() => router.push("/dashboard/settings")}
+            className="group flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-muted"
+          >
             <div className="flex items-center gap-2 text-foreground">
               <Settings className="h-4 w-4 opacity-70 group-hover:opacity-100" />
               Settings
