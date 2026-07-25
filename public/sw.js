@@ -30,24 +30,26 @@ self.addEventListener("fetch", (event) => {
 
   if (request.url.includes("/api/auth/token")) {
     event.respondWith(
-      fetch(request)
-        .then((res) => {
-          if (res.ok) {
-            const clone = res.clone()
-            caches.open(CACHE).then((cache) => cache.put("auth-token", clone))
+      caches.delete("auth-token").then(() =>
+        fetch(request)
+          .then((res) => {
+            if (res.ok) {
+              const clone = res.clone()
+              caches.open(CACHE).then((cache) => cache.put("auth-token", clone))
+            }
             return res
-          }
-          return caches.match("auth-token").then((cached) => cached || res)
-        })
-        .catch(() => caches.match("auth-token"))
-        .then(
-          (res) =>
-            res ||
-            new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 401,
-              headers: { "Content-Type": "application/json" },
-            })
-        )
+          })
+          .catch(() =>
+            caches.match("auth-token").then(
+              (cached) =>
+                cached ||
+                new Response(JSON.stringify({ error: "Unauthorized" }), {
+                  status: 401,
+                  headers: { "Content-Type": "application/json" },
+                })
+            )
+          )
+      )
     )
     return
   }

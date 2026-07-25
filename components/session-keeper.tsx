@@ -70,6 +70,13 @@ export function SessionKeeper() {
 
       if (restoreRes.ok) {
         window.location.reload()
+      } else {
+        localStorage.removeItem(STORAGE_KEY)
+        try {
+          const db = await openDB()
+          const tx = db.transaction("tokens", "readwrite")
+          tx.objectStore("tokens").delete(STORAGE_KEY)
+        } catch {}
       }
     }
     keep()
