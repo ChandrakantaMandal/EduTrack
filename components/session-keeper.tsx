@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 
 const STORAGE_KEY = "next-auth-token"
+const RELOADED_KEY = "session-keeper-reloaded"
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -57,7 +58,10 @@ export function SessionKeeper() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         })
-        if (restoreRes.ok) window.location.reload()
+        if (restoreRes.ok && !sessionStorage.getItem(RELOADED_KEY)) {
+          sessionStorage.setItem(RELOADED_KEY, "1")
+          window.location.reload()
+        }
         return
       }
 
@@ -70,7 +74,10 @@ export function SessionKeeper() {
       })
 
       if (restoreRes.ok) {
-        window.location.reload()
+        if (!sessionStorage.getItem(RELOADED_KEY)) {
+          sessionStorage.setItem(RELOADED_KEY, "1")
+          window.location.reload()
+        }
       } else {
         localStorage.removeItem(STORAGE_KEY)
         try {
