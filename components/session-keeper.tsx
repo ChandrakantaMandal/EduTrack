@@ -60,7 +60,7 @@ export function SessionKeeper() {
         })
         if (restoreRes.ok && !sessionStorage.getItem(RELOADED_KEY)) {
           sessionStorage.setItem(RELOADED_KEY, "1")
-          window.location.reload()
+          window.location.replace("/dashboard")
         }
         return
       }
@@ -76,7 +76,7 @@ export function SessionKeeper() {
       if (restoreRes.ok) {
         if (!sessionStorage.getItem(RELOADED_KEY)) {
           sessionStorage.setItem(RELOADED_KEY, "1")
-          window.location.reload()
+          window.location.replace("/dashboard")
         }
       } else {
         localStorage.removeItem(STORAGE_KEY)
