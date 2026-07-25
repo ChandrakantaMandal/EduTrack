@@ -33,10 +33,6 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  if (request.url.includes("/api/auth/")) {
-    return
-  }
-
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((res) => {
