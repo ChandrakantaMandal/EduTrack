@@ -29,6 +29,15 @@ export const authOptions = {
     },
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const pattern = /^\d{2}[a-zA-Z]{3}\d{3}@abit\.edu\.in$/
+        if (!user.email || !pattern.test(user.email)) {
+          return "/login?error=college_email"
+        }
+      }
+      return true
+    },
     session({ session, token }) {
       if (session.user && token.sub) {
         ;(

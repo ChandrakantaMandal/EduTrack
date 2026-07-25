@@ -1,15 +1,17 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { GraduationCap, Loader2 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { GraduationCap, Loader2, AlertCircle } from "lucide-react"
 
-export default function LoginPage() {
+function LoginForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const popupRef = useRef<Window | null>(null)
+  const searchParams = useSearchParams()
+  const error = searchParams.get("error")
 
   async function handleGoogleSignIn() {
     setLoading(true)
@@ -58,6 +60,16 @@ export default function LoginPage() {
             Sign in to continue to EduTrack
           </p>
         </div>
+
+        {error === "college_email" && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Only <strong>@abit.edu.in</strong> college emails are allowed.
+              Sign in with your college email.
+            </span>
+          </div>
+        )}
 
         <button
           onClick={handleGoogleSignIn}
@@ -117,5 +129,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
