@@ -52,11 +52,12 @@ export function SessionKeeper() {
       if (res.ok) {
         const { token } = await res.json()
         await setStored(token)
-        await fetch("/api/auth/restore", {
+        const restoreRes = await fetch("/api/auth/restore", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         })
+        if (restoreRes.ok) window.location.reload()
         return
       }
 
