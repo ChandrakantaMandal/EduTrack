@@ -28,6 +28,29 @@ self.addEventListener("fetch", (event) => {
   const { request } = event
   if (request.method !== "GET") return
 
+  if (request.url.includes("/api/auth/token")) {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            const clone = res.clone()
+            caches.open(CACHE).then((cache) => cache.put("auth-token", clone))
+          }
+          return res
+        })
+        .catch(() => caches.match("auth-token"))
+        .then(
+          (res) =>
+            res ||
+            new Response(JSON.stringify({ error: "Unauthorized" }), {
+              status: 401,
+              headers: { "Content-Type": "application/json" },
+            })
+        )
+    )
+    return
+  }
+
   if (request.headers.get("Accept")?.includes("text/html")) {
     event.respondWith(fetch(request).catch(() => caches.match("/offline")))
     return
@@ -36,7 +59,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((res) => {
-        if (res.ok) {
+        if (res.ok && !request.url.includes("/api/auth/")) {
           const clone = res.clone()
           caches.open(CACHE).then((cache) => cache.put(request, clone))
         }

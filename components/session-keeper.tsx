@@ -8,9 +8,17 @@ export function SessionKeeper() {
   useEffect(() => {
     async function keep() {
       const res = await fetch("/api/auth/token")
+
       if (res.ok) {
         const { token } = await res.json()
         localStorage.setItem(STORAGE_KEY, token)
+        // Always try to restore the cookie — handles SW-cached token
+        // when the actual cookie was cleared (e.g. killed from recents)
+        await fetch("/api/auth/restore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        })
         return
       }
 
