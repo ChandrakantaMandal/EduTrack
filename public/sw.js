@@ -35,8 +35,9 @@ self.addEventListener("fetch", (event) => {
           if (res.ok) {
             const clone = res.clone()
             caches.open(CACHE).then((cache) => cache.put("auth-token", clone))
+            return res
           }
-          return res
+          return caches.match("auth-token").then((cached) => cached || res)
         })
         .catch(() => caches.match("auth-token"))
         .then(
