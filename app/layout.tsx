@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
+import { SessionKeeper } from "@/components/session-keeper"
 import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>{children}</ThemeProvider>
         <ServiceWorkerRegister />
+        <SessionKeeper />
       </body>
     </html>
   )

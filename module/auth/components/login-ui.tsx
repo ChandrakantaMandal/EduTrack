@@ -1,51 +1,19 @@
 "use client"
 
-import { useState, useRef, Suspense } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { GraduationCap, Loader2, AlertCircle } from "lucide-react"
 
 function LoginForm() {
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const popupRef = useRef<Window | null>(null)
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
 
   async function handleGoogleSignIn() {
     setLoading(true)
-    const csrfRes = await fetch("/api/auth/csrf")
-    const { csrfToken } = await csrfRes.json()
-
-    const res = await fetch("/api/auth/signin/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        csrfToken,
-        callbackUrl: "/dashboard",
-        json: "true",
-      }),
-    })
-    const data = await res.json()
-
-    const width = 500
-    const height = 600
-    const left = window.screenX + (window.innerWidth - width) / 2
-    const top = window.screenY + (window.innerHeight - height) / 2
-    popupRef.current = window.open(
-      data.url,
-      "oauth-popup",
-      `width=${width},height=${height},left=${left},top=${top},popup=1`
-    )
-
-    const timer = setInterval(() => {
-      if (popupRef.current?.closed) {
-        clearInterval(timer)
-        popupRef.current = null
-        router.push("/dashboard")
-      }
-    }, 500)
+    await signIn("google", { callbackUrl: "/dashboard" })
   }
 
   return (
