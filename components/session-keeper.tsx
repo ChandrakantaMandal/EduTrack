@@ -7,13 +7,17 @@ const STORAGE_KEY = "next-auth-token"
 export function SessionKeeper() {
   useEffect(() => {
     async function keep() {
-      const res = await fetch("/api/auth/token")
+      const stored = localStorage.getItem(STORAGE_KEY)
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+      if (stored) headers["Authorization"] = `Bearer ${stored}`
+
+      const res = await fetch("/api/auth/token", { headers })
 
       if (res.ok) {
         const { token } = await res.json()
         localStorage.setItem(STORAGE_KEY, token)
-        // Always try to restore the cookie — handles SW-cached token
-        // when the actual cookie was cleared (e.g. killed from recents)
         await fetch("/api/auth/restore", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -22,7 +26,6 @@ export function SessionKeeper() {
         return
       }
 
-      const stored = localStorage.getItem(STORAGE_KEY)
       if (!stored) return
 
       const restoreRes = await fetch("/api/auth/restore", {
