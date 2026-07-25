@@ -16,7 +16,12 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const token = await getToken({ req, raw: true })
+  const token = await getToken({
+    req,
+    raw: true,
+    cookieName: "next-auth.session-token",
+    secret: process.env.AUTH_SECRET,
+  })
   if (!token)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   return NextResponse.json({ token })
