@@ -83,7 +83,11 @@ export function AttendancePage() {
     setSaving(true)
     setError("")
     try {
-      const records = Object.entries(attendance).map(([userId, present]) => ({
+      const full = { ...attendance }
+      for (const s of students) {
+        if (!(s.id in full)) full[s.id] = false
+      }
+      const records = Object.entries(full).map(([userId, present]) => ({
         userId,
         present,
       }))
