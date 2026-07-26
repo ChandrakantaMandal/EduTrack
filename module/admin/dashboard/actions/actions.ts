@@ -34,26 +34,36 @@ export async function saveAttendance(
 ) {
   const dateStart = new Date(date + "T00:00:00.000Z")
 
-  await prisma.$transaction(
-    records.map((r) =>
-      prisma.attendance.upsert({
-        where: {
-          userId_subjectId_date: {
-            userId: r.userId,
-            subjectId,
-            date: dateStart,
-          },
-        },
-        update: { present: r.present },
-        create: {
-          userId: r.userId,
-          subjectId,
-          date: dateStart,
-          present: r.present,
-        },
-      })
+  const existing = await prisma.attendance.findMany({
+    where: { subjectId, date: dateStart },
+    select: { userId: true },
+  })
+  const existingIds = new Set(existing.map((r) => r.userId))
+
+  const toCreate = records.filter((r) => !existingIds.has(r.userId))
+  const toUpdate = records.filter((r) => existingIds.has(r.userId))
+
+  if (toCreate.length > 0) {
+    await prisma.attendance.createMany({
+      data: toCreate.map((r) => ({
+        userId: r.userId,
+        subjectId,
+        date: dateStart,
+        present: r.present,
+      })),
+    })
+  }
+
+  if (toUpdate.length > 0) {
+    await prisma.$transaction(
+      toUpdate.map((r) =>
+        prisma.attendance.updateMany({
+          where: { userId: r.userId, subjectId, date: dateStart },
+          data: { present: r.present },
+        })
+      )
     )
-  )
+  }
 }
 
 export async function getAdminDashboardData() {
