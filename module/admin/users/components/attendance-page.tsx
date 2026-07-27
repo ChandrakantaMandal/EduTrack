@@ -19,6 +19,7 @@ type Student = {
   email: string | null
   studentId: string | null
   course: string | null
+  practicalGroup: string | null
 }
 
 export function AttendancePage() {
@@ -27,11 +28,11 @@ export function AttendancePage() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0])
   const [students, setStudents] = useState<Student[]>([])
   const [attendance, setAttendance] = useState<Record<string, boolean>>({})
+  const [selectedGroup, setSelectedGroup] = useState("")
   const [search, setSearch] = useState("")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
-  const [locked, setLocked] = useState(false)
 
   useEffect(() => {
     getSubjects().then((s) => {
@@ -42,20 +43,43 @@ export function AttendancePage() {
 
   useEffect(() => {
     if (!selectedSubject) return
-    getUsers().then((users) => setStudents(users))
+    getUsers().then((users) => {
+      setStudents(users)
+      const groups = [
+        ...new Set(
+          users
+            .map((u) => u.practicalGroup)
+            .filter((g): g is string => g !== null)
+        ),
+      ]
+      if (groups.length === 0) {
+        setSelectedGroup("")
+      }
+    })
     getAttendanceRecords(selectedSubject, date).then((records) => {
       const map: Record<string, boolean> = {}
       for (const r of records) {
         map[r.userId] = r.present
       }
       setAttendance(map)
-      setLocked(records.length > 0)
       setSaved(false)
       setError("")
     })
   }, [selectedSubject, date])
 
-  const filtered = students
+  const groups = [
+    ...new Set(
+      students
+        .map((u) => u.practicalGroup)
+        .filter((g): g is string => g !== null)
+    ),
+  ].sort()
+
+  const groupFiltered = selectedGroup
+    ? students.filter((u) => u.practicalGroup === selectedGroup)
+    : students
+
+  const filtered = groupFiltered
     .filter(
       (e) =>
         e.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -84,7 +108,7 @@ export function AttendancePage() {
     setError("")
     try {
       const full = { ...attendance }
-      for (const s of students) {
+      for (const s of groupFiltered) {
         if (!(s.id in full)) full[s.id] = false
       }
       const records = Object.entries(full).map(([userId, present]) => ({
@@ -98,7 +122,6 @@ export function AttendancePage() {
         map[r.userId] = r.present
       }
       setAttendance(map)
-      setLocked(true)
       setSaving(false)
       setSaved(true)
     } catch (e) {
@@ -107,7 +130,7 @@ export function AttendancePage() {
     }
   }
 
-  const markedCount = Object.keys(attendance).length
+  const markedCount = groupFiltered.filter((s) => s.id in attendance).length
 
   const selectedSubjectName =
     subjects.find((s) => s.id === selectedSubject)?.name ?? "Subject"
@@ -191,6 +214,23 @@ export function AttendancePage() {
             </option>
           ))}
         </select>
+        {groups.length > 0 && (
+          <select
+            value={selectedGroup}
+            onChange={(e) => {
+              setSelectedGroup(e.target.value)
+              setSaved(false)
+            }}
+            className="w-32 rounded-xl border bg-card px-4 py-2.5 text-sm text-foreground transition outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="">All</option>
+            {groups.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        )}
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -252,26 +292,20 @@ export function AttendancePage() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => setPresent(u.id)}
-                      disabled={locked}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
                         isPresent === true
                           ? "border-green-500 bg-green-500/10 text-green-600"
-                          : locked
-                            ? "cursor-not-allowed border-muted text-muted-foreground opacity-40"
-                            : "border-muted text-muted-foreground hover:border-green-300"
+                          : "border-muted text-muted-foreground hover:border-green-300"
                       }`}
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setAbsent(u.id)}
-                      disabled={locked}
                       className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
                         isPresent === false
                           ? "border-red-500 bg-red-500/10 text-red-600"
-                          : locked
-                            ? "cursor-not-allowed border-muted text-muted-foreground opacity-40"
-                            : "border-muted text-muted-foreground hover:border-red-300"
+                          : "border-muted text-muted-foreground hover:border-red-300"
                       }`}
                     >
                       <X className="h-4 w-4" />
@@ -294,17 +328,15 @@ export function AttendancePage() {
             <span className="ml-2 font-medium text-red-600">{error}</span>
           )}
         </p>
-        {!locked && (
-          <button
-            onClick={handleSave}
-            disabled={markedCount === 0 || saving}
-            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-40"
-          >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {saving ? "Saving..." : "Save Attendance"}
-          </button>
-        )}
-        {locked && (
+        <button
+          onClick={handleSave}
+          disabled={markedCount === 0 || saving}
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-40"
+        >
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+          {saving ? "Saving..." : "Save Attendance"}
+        </button>
+        {markedCount > 0 && (
           <button
             onClick={handleDownloadPdf}
             className="flex items-center gap-2 rounded-xl border border-muted bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted/50"

@@ -14,6 +14,7 @@ export async function getUsers() {
       email: true,
       studentId: true,
       course: true,
+      practicalGroup: true,
     },
     orderBy: { name: "asc" },
   })
