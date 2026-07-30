@@ -1,7 +1,13 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { BarChart3, BookOpen, LayoutDashboard, Settings } from "lucide-react"
+import {
+  BarChart3,
+  BookOpen,
+  FileText,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -9,6 +15,7 @@ import { usePathname } from "next/navigation"
 const items = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { name: "Subjects", icon: BookOpen, href: "/dashboard/subjects" },
+  { name: "Subject Files", icon: FileText, href: "/dashboard/subjects/files" },
   { name: "Reports", icon: BarChart3, href: "/dashboard/reports" },
   { name: "Settings", icon: Settings, href: "/dashboard/settings" },
 ]

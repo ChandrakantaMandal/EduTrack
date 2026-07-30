@@ -66,6 +66,7 @@ model Subject {
 
   attendance      Attendance[]
   scheduleEntries ScheduleEntry[]
+  subjectFiles    SubjectFile[]
 }
 
 model Attendance {
@@ -80,6 +81,18 @@ model Attendance {
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subjectId, date])
+}
+
+model SubjectFile {
+  id        String   @id @default(cuid())
+  subjectId String
+  label     String
+  type      String
+  fileUrl   String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 }
 
 model ScheduleEntry {
