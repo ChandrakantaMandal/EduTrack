@@ -90,7 +90,7 @@ export default async function Dashboard() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs text-muted-foreground">
-                  Days Present
+                  Class Present
                 </p>
                 <p className="truncate text-lg font-bold sm:text-xl">
                   {data.daysPresent}/{data.totalDays}

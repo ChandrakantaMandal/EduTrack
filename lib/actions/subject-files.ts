@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
 const BUCKET = "subject-files"
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 export async function ensureBucket() {
   const { data: buckets } = await supabaseAdmin.storage.listBuckets()
@@ -25,6 +26,10 @@ export async function uploadSubjectFile(
 
   const file = formData.get("file") as File | null
   if (!file) throw new Error("No file provided")
+
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("File exceeds the 10MB limit")
+  }
 
   const ext = file.name.split(".").pop()
   const path = `${subjectId}/${type.toLowerCase()}/${crypto.randomUUID()}.${ext}`

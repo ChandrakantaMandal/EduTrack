@@ -46,6 +46,7 @@ export function SubjectFilesPage() {
     label: "",
     type: "NOTES",
   })
+  const [uploadError, setUploadError] = useState("")
 
   useEffect(() => {
     getAllSubjectsWithFiles().then((s) => {
@@ -61,7 +62,13 @@ export function SubjectFilesPage() {
   }
 
   async function handleUpload(subjectId: string, formData: FormData) {
+    const file = formData.get("file") as File | null
+    if (file && file.size > 10 * 1024 * 1024) {
+      setUploadError("File exceeds the 10MB limit")
+      return
+    }
     setUploading(subjectId)
+    setUploadError("")
     try {
       await uploadSubjectFile(
         subjectId,
@@ -160,12 +167,13 @@ export function SubjectFilesPage() {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">
-                File
+                File (max 10MB)
               </label>
               <input
                 name="file"
                 type="file"
                 required
+                onChange={() => setUploadError("")}
                 className="block w-full text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary hover:file:bg-primary/20"
               />
             </div>
@@ -182,6 +190,9 @@ export function SubjectFilesPage() {
               Upload
             </button>
           </form>
+          {uploadError && (
+            <p className="mt-3 text-xs text-destructive">{uploadError}</p>
+          )}
         </div>
 
         {syllabusFiles.length > 0 && (
