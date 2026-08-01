@@ -1,6 +1,10 @@
 import { Card } from "@/components/ui/card"
 
-const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+function formatMonth(key: string) {
+  const [y, m] = key.split("-").map(Number)
+  const d = new Date(y, (m ?? 1) - 1, 1)
+  return d.toLocaleString("default", { month: "short" })
+}
 
 export function MonthlyTrend({ data }: { data: Record<string, number> }) {
   const entries = Object.entries(data).slice(-6)
@@ -14,7 +18,7 @@ export function MonthlyTrend({ data }: { data: Record<string, number> }) {
         {values.length > 0 ? (
           values.map((v, i) => (
             <div
-              key={i}
+              key={entries[i][0]}
               className="flex h-full flex-1 flex-col items-center justify-end"
             >
               <div
@@ -22,7 +26,7 @@ export function MonthlyTrend({ data }: { data: Record<string, number> }) {
                 style={{ height: `${Math.max(v, 4)}%` }}
               />
               <span className="mt-1 text-[10px] text-muted-foreground">
-                {labels[i] ?? entries[i][0]}
+                {formatMonth(entries[i][0])}
               </span>
             </div>
           ))

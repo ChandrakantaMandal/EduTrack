@@ -33,7 +33,7 @@ export default async function Dashboard() {
           </div>
           <div className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
             <CalendarCheck className="h-4 w-4" />
-            <span>Spring 2026</span>
+            <span>5th Semester</span>
           </div>
         </div>
 
