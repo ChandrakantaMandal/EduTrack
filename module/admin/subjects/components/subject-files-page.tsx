@@ -15,7 +15,8 @@ import {
 } from "lucide-react"
 import {
   getAllSubjectsWithFiles,
-  uploadSubjectFile,
+  createSignedUploadUrl,
+  saveSubjectFile,
   deleteSubjectFile,
 } from "@/lib/actions/subject-files"
 
@@ -63,22 +64,41 @@ export function SubjectFilesPage() {
 
   async function handleUpload(subjectId: string, formData: FormData) {
     const file = formData.get("file") as File | null
-    if (file && file.size > 10 * 1024 * 1024) {
+    if (!file) {
+      setUploadError("Please choose a file")
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
       setUploadError("File exceeds the 10MB limit")
       return
     }
     setUploading(subjectId)
     setUploadError("")
     try {
-      await uploadSubjectFile(
+      const label = uploadData.label.trim() || "Untitled"
+      const { signedUrl, path, publicUrl } = await createSignedUploadUrl(
         subjectId,
-        uploadData.label || "Untitled",
+        label,
         uploadData.type,
-        formData
+        file.name,
+        file.size
       )
+      const res = await fetch(signedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type || "application/octet-stream",
+        },
+        body: file,
+      })
+      if (!res.ok) {
+        throw new Error(`Upload failed (${res.status})`)
+      }
+      await saveSubjectFile(subjectId, label, uploadData.type, path, publicUrl)
       setUploadData({ label: "", type: "NOTES" })
       load()
-    } catch {}
+    } catch {
+      setUploadError("Upload failed. Please try again.")
+    }
     setUploading(null)
   }
 
@@ -127,8 +147,10 @@ export function SubjectFilesPage() {
             </span>
           </div>
           <form
-            action={async (fd) => {
-              await handleUpload(selected.id, fd)
+            onSubmit={(e) => {
+              e.preventDefault()
+              const fd = new FormData(e.currentTarget)
+              handleUpload(selected.id, fd)
             }}
             className="flex flex-wrap items-end gap-3"
           >

@@ -16,36 +16,51 @@ export async function ensureBucket() {
   }
 }
 
-export async function uploadSubjectFile(
+export async function createSignedUploadUrl(
   subjectId: string,
   label: string,
   type: "SYLLABUS" | "NOTES",
-  formData: FormData
+  fileName: string,
+  fileSize: number
 ) {
   await ensureBucket()
 
-  const file = formData.get("file") as File | null
-  if (!file) throw new Error("No file provided")
-
-  if (file.size > MAX_FILE_SIZE) {
+  if (fileSize > MAX_FILE_SIZE) {
     throw new Error("File exceeds the 10MB limit")
   }
 
-  const ext = file.name.split(".").pop()
+  const ext = fileName.split(".").pop()
   const path = `${subjectId}/${type.toLowerCase()}/${crypto.randomUUID()}.${ext}`
 
-  const { error: uploadError } = await supabaseAdmin.storage
+  const { data, error } = await supabaseAdmin.storage
     .from(BUCKET)
-    .upload(path, file)
+    .createSignedUploadUrl(path)
 
-  if (uploadError) throw new Error(uploadError.message)
+  if (error || !data)
+    throw new Error(error?.message ?? "Failed to create upload")
 
   const {
     data: { publicUrl },
   } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(path)
 
+  return { signedUrl: data.signedUrl, path, publicUrl }
+}
+
+export async function saveSubjectFile(
+  subjectId: string,
+  label: string,
+  type: "SYLLABUS" | "NOTES",
+  filePath: string,
+  publicUrl: string
+) {
   await prisma.subjectFile.create({
-    data: { subjectId, label, type, fileUrl: publicUrl, filePath: path },
+    data: {
+      subjectId,
+      label,
+      type,
+      fileUrl: publicUrl,
+      filePath,
+    },
   })
 
   revalidatePath("/admin/subjects")
